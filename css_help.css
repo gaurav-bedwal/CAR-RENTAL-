@@ -1,0 +1,52 @@
+body{
+    background-image:url(https://tse2.mm.bing.net/th?id=OIP.tLoaDrSkggWXvCa8JoIIqAHaEo&pid=Api&P=0&h=180);
+    font-family: Arial, sans-serif;
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-sizing: border-box;
+    }
+    
+.box {
+    width: 70%;
+    margin: auto;
+    border: 2px solid black;
+    padding: 20px;
+    margin-top:80px;
+    background:#bdb9b9a8;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-sizing: border-box;}
+
+h1,h3{
+    text-align: center;
+    color: black;
+}
+
+p {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+
+.contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.phone a{
+    font-weight: bold;
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+.phone1, .email1 {
+    font-weight: bold;
+    color: black;
+}
+.email a{
+    font-weight: bold;
+    color: whitesmoke;
+    text-decoration: none;
+}

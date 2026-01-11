@@ -1,0 +1,76 @@
+body {
+    background-image:url("https://www.leisuremartini.com/wp-content/uploads/2021/04/Top-Tips-for-Finding-the-Right-Car-Insurance-Policy-for-You.jpg");
+    font-family: Arial, sans-serif;
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 400px;
+    margin: 50px auto;
+    border: 1px solid gray;
+    padding: 20px;
+    background:#18181d91;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-repeat: no-repeat;
+    background-size: cover;
+    box-sizing: border-box;
+    border-radius: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #fff;
+}
+
+h4 {
+    color: #fff;
+}
+
+.form-group {
+    margin: 10px 0;
+    color:#fff;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+}
+
+input {
+    width: 95%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    outline: none;
+    
+}
+
+input:focus {
+    border-color: #fff;
+}
+
+.button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #121216a5;
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-align:center;
+}
+
+.button:hover {
+    background-color: grey;
+}
+
+.message {
+    text-align: center;
+    color: #ff0000;
+    font-weight: bold;
+}
+.top {
+    font-size: 60px;
+    color: rgb(8, 7, 7);
+}

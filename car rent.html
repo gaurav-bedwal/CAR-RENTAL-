@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="car rent.css">
+</head>
+<body>
+    <h1 class="top">"THE CAR'S WORLD"</h1>
+    <div class="container">
+        <h1>CAR RENTAL'S</h1>
+        <h4>Kindly fill your correct details </h4>
+        <form id="Sign-Up" method="post" action="login.php">
+
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="enter your username" required>
+            </div>
+
+
+            <div class="form-group">
+                <label for="carModel">Car Segment:</label>
+        <select id="carModel" name="carmodel" required>
+            <option value="select">select</option>  
+            <option value="hatchbag">HATCHBAG</option>
+            <option value="sedan">SEDAN</option>
+            <option value="muv">MUV</option>
+        <option value="suv">SUV</option>
+        <option value="bus">BUS</option>
+        </select><br><br>
+            </div>
+
+            <div class="form-group">
+                <label for="car-type">Car Type:</label>
+        <select id="car-type" name="car-type" class="form-select" required>
+        <option value="select">select</option>
+        <option value="swift">MERSEDEZ BENZ</option>
+        <option value="midsize">AUDI Q3</option>
+        <option value="fullsize">G - WAGON</option>
+        <option value="suv">MINI-CUPER</option>
+        <option value="van">TOYOTA SUPRA</option>
+        <option value="van">LIMOSINE</option>
+        <option value="van">ROLLS ROYCE</option>
+        <option value="van">SKODA RAPID</option>
+        <option value="van">LAMBORGHINI AVENDATOR</option>
+        <option value="van">MUSTANG</option>
+        <option value="van">TRACTOR</option>
+        </select><br><br>
+            </div>
+            
+
+
+            <div class="form-group">
+                <label for="pickupDate">Pickup Date:</label>
+        <input type="date" id="pickupDate" name="pickupDate" required><br>
+
+            </div>
+
+
+            <div class="form-group">
+                <label for="pickup-time">Pickup Time:</label>
+        <input type="time" id="pickup-time" name="pickup-time" class="form-input" required>
+            </div>
+            
+
+            <div class="form-group">
+                <label for="pickup-location">Pickup Location:</label>
+        <input type="text" id="pickup-location" name="pickup-location" class="form-input" required><br>
+            </div>
+
+            <div class="form-group">
+                <label for="returnDate">Return Date:</label>
+                <input type="date" id="returnDate" name="returnDate" required><br>
+            </div><br>
+
+            <div class="form-group">
+                <input type="submit" id="submit" name="submit" value="SUBMIT" class="button">
+            </div>
+            <div class="form-group"></div>
+        </form>
+        <div id="message" class="message"></div>
+    </div>
+    
+</body>
+</html>

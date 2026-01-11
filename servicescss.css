@@ -1,0 +1,47 @@
+body {
+    background-image:url(https://tse2.mm.bing.net/th?id=OIP.tLoaDrSkggWXvCa8JoIIqAHaEo&pid=Api&P=0&h=180);
+    background-repeat: no-repeat;
+    background-size: cover;
+    font-family: Arial, sans-serif;
+    margin: 10px;
+    padding: 65px;
+    background-color: #f4f4f4;
+}
+
+#services {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.service {
+    width: 45%;
+    margin-bottom: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.service:hover {
+    transform: scale(1.09);
+    transition-duration: 0.9s;
+    
+}
+
+.service img {
+    height: 20rem;
+    max-width: 600px;
+    margin-bottom: 50px;
+}
+
+.service h3 {
+    font-size: 1.5em;
+    margin: 0 0 10px;
+}
+
+.service p {
+    font-size: 1em;
+    margin: 0;
+}
