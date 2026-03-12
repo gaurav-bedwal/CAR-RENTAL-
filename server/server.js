@@ -24,5 +24,14 @@ app.use('/api/user', userRouter)
 app.use('/api/owner', ownerRouter)
 app.use('/api/bookings', bookingRouter)
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({
+        success: false,
+        message: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, ()=> console.log(`Server running on port ${PORT}`))
