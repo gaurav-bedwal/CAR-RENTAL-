@@ -1,0 +1,17 @@
+node_modules
+.env
+.env.local
+.env.*.local
+dist
+dist-ssr
+*.local
+.DS_Store
+
+# Server logs
+server/logs
+server/*.log
+server/npm-debug.log*
+
+# Client build
+client/dist
+client/dist-ssr
