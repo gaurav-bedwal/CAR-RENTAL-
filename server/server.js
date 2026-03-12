@@ -10,9 +10,6 @@ import bookingRouter from "./routes/bookingRoutes.js";
 // Initialize Express App
 const app = express()
 
-// Connect Database
-await connectDB()
-
 // Middleware
 app.use(cors({
     origin: process.env.CLIENT_URL || "*", // Define CLIENT_URL in your production .env
