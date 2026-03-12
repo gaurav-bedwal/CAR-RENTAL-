@@ -19,6 +19,7 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 
+// Routes
 app.get('/', (req, res)=> res.send("Server is running"))
 app.use('/api/user', userRouter)
 app.use('/api/owner', ownerRouter)
@@ -34,4 +35,16 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, ()=> console.log(`Server running on port ${PORT}`))
+
+// Start Server with DB Connection Resilience
+const startServer = async () => {
+    try {
+        await connectDB();
+        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    } catch (error) {
+        console.error("Failed to connect to Database:", error);
+        process.exit(1);
+    }
+};
+
+startServer();
