@@ -34,7 +34,7 @@ const MyBookings = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
 
-      className='px-6 md:px-16 lg:px-24 xl:px-32 2xl:px-48 py-16 text-sm max-w-7xl mx-auto bg-[#0B0D17] min-h-screen text-gray-300'>
+      className='px-4 md:px-16 lg:px-24 xl:px-32 2xl:px-48 py-10 md:py-16 text-sm max-w-7xl mx-auto bg-[#0B0D17] min-h-screen text-gray-300'>
 
       <Title title='My Bookings'
         subTitle='View and manage your all car bookings'
@@ -47,7 +47,7 @@ const MyBookings = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1, duration: 0.4 }}
 
-            key={booking._id} className='grid grid-cols-1 md:grid-cols-4 gap-6 p-8 bg-[#141824] border border-white/5 hover:border-primary/30 transition-all duration-300 rounded-2xl mt-5 shadow-2xl'>
+            key={booking._id} className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 p-6 md:p-8 bg-[#141824] border border-white/5 hover:border-primary/30 transition-all duration-300 rounded-2xl mt-5 shadow-2xl'>
             {/* Car Image + Info */}
 
             <div className='md:col-span-1'>
@@ -60,7 +60,7 @@ const MyBookings = () => {
             </div>
 
             {/* Booking Info */}
-            <div className='md:col-span-2 md:px-6'>
+            <div className='sm:col-span-2 md:px-6 order-last sm:order-none'>
               <div className='flex items-center gap-3'>
                 <p className='px-4 py-1.5 bg-[#0a0a0a] border border-white/5 rounded-lg text-gray-300 font-semibold uppercase tracking-wider text-xs'>Booking #{index + 1}</p>
                 <p className={`px-4 py-1.5 text-xs rounded-full font-bold uppercase tracking-wider ${booking.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>{booking.status}</p>

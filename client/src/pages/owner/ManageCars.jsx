@@ -85,9 +85,9 @@ const ManageCars = () => {
       
       <Title title="Manage Cars" subTitle="View all listed cars, update their details, or remove them from the booking platform."/>
 
-      <div className='max-w-4xl w-full rounded-3xl overflow-hidden bg-[#141824] border border-white/5 shadow-2xl mt-8 mb-20'>
+      <div className='max-w-4xl w-full rounded-3xl overflow-x-auto bg-[#141824] border border-white/5 shadow-2xl mt-8 mb-20'>
 
-        <table className='w-full border-collapse text-left text-sm text-gray-400'>
+        <table className='w-full border-collapse text-left text-sm text-gray-400 min-w-[700px]'>
           <thead className='text-gray-500 uppercase tracking-widest text-xs bg-[#1a1a1a]'>
             <tr>
               <th className="p-4 font-medium pl-6">Car</th>

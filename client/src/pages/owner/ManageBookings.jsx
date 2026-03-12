@@ -42,9 +42,9 @@ const ManageBookings = () => {
       
       <Title title="Manage Bookings" subTitle="Track all customer bookings, approve or cancel requests, and manage booking statuses."/>
 
-      <div className='max-w-5xl w-full rounded-3xl overflow-hidden bg-[#141824] border border-white/5 shadow-2xl mt-8 mb-20'>
+      <div className='max-w-5xl w-full rounded-3xl overflow-x-auto bg-[#141824] border border-white/5 shadow-2xl mt-8 mb-20'>
 
-        <table className='w-full border-collapse text-left text-sm text-gray-400'>
+        <table className='w-full border-collapse text-left text-sm text-gray-400 min-w-[700px]'>
           <thead className='text-gray-500 uppercase tracking-widest text-xs bg-[#1a1a1a]'>
             <tr>
               <th className="p-4 pl-6 font-medium">Car & User</th>
