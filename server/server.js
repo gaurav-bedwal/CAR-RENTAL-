@@ -40,7 +40,9 @@ const PORT = process.env.PORT || 3000;
 const startServer = async () => {
     try {
         await connectDB();
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        if (process.env.NODE_ENV !== 'production') {
+            app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+        }
     } catch (error) {
         console.error("Failed to connect to Database:", error);
         process.exit(1);
@@ -48,3 +50,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+export default app;
