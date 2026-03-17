@@ -41,7 +41,7 @@ const CarDetails = () => {
   }, [cars, id])
 
   return car ? (
-    <div className='px-6 md:px-16 lg:px-24 xl:px-32 py-16 bg-[#0a0a0a] min-h-screen text-gray-300'>
+    <div className='px-4 md:px-16 lg:px-24 xl:px-32 py-10 md:py-16 bg-[#0a0a0a] min-h-screen text-gray-300'>
 
       <button onClick={() => navigate(-1)} className='flex items-center gap-2 mb-8 text-gray-400 hover:text-primary transition-colors cursor-pointer group uppercase tracking-wider text-sm font-semibold'>
         <img src={assets.arrow_icon} alt="" className='rotate-180 brightness-200 opacity-60 group-hover:invert transition-all mr-1' />
@@ -126,7 +126,7 @@ const CarDetails = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
 
-          onSubmit={handleSubmit} className='bg-[#111] border border-white/5 shadow-2xl h-max sticky top-[100px] rounded-2xl p-8 space-y-6 text-gray-300'>
+          onSubmit={handleSubmit} className='bg-[#111] border border-white/5 shadow-2xl h-max lg:sticky lg:top-[100px] rounded-2xl p-6 md:p-8 space-y-6 text-gray-300'>
 
           <p className='flex items-end justify-between font-semibold'>
             <span className='text-3xl text-white font-bold tracking-tight'>{currency}{car.pricePerDay}</span>
