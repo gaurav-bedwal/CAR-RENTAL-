@@ -44,8 +44,10 @@ const startServer = async () => {
         // Log but don't crash — server still serves requests
         console.error("⚠️ Server started WITHOUT database connection:", error.message);
     }
-    // Always listen — whether connected to DB or not
-    app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+    // Only listen if NOT on Vercel
+    if (!process.env.VERCEL) {
+        app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+    }
 };
 
 startServer();
