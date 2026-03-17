@@ -1,7 +1,11 @@
 {
+  "version": 2,
+  "buildCommand": "npm run build --prefix client",
+  "outputDirectory": "client/dist",
+  "installCommand": "npm install --prefix client && npm install --prefix server",
   "functions": {
     "server/server.js": {
-      "runtime": "@vercel/node"
+      "runtime": "@vercel/node@3"
     }
   },
   "rewrites": [
@@ -10,7 +14,7 @@
       "destination": "/server/server.js"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
   ]
