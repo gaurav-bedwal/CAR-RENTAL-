@@ -36,17 +36,16 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 
-// Start Server with DB Connection Resilience
+// Start Server
 const startServer = async () => {
     try {
         await connectDB();
-        if (process.env.NODE_ENV !== 'production') {
-            app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-        }
     } catch (error) {
-        console.error("Failed to connect to Database:", error);
-        process.exit(1);
+        // Log but don't crash — server still serves requests
+        console.error("⚠️ Server started WITHOUT database connection:", error.message);
     }
+    // Always listen — whether connected to DB or not
+    app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
 };
 
 startServer();
