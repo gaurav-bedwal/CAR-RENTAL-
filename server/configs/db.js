@@ -18,27 +18,12 @@ const connectDB = async () => {
 
     // Connection options: increase server selection timeout and socket timeout
     const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      dbName: 'car-rental',
       serverSelectionTimeoutMS: 30000, // 30 seconds
       socketTimeoutMS: 30000,
     };
 
-    // Robust URI handling: Only append DB name if not already present
-    let connectionString = process.env.MONGODB_URI;
-    if (!connectionString.includes('/car-rental')) {
-        // If there's a query param (?), insert DB name before it
-        if (connectionString.includes('?')) {
-            connectionString = connectionString.replace('?', '/car-rental?');
-        } else {
-            // Ensure trailing slash or append
-            connectionString = connectionString.endsWith('/') 
-                ? `${connectionString}car-rental` 
-                : `${connectionString}/car-rental`;
-        }
-    }
-
-    await mongoose.connect(connectionString, options);
+    await mongoose.connect(process.env.MONGODB_URI, options);
   } catch (error) {
     console.error("❌ MONGODB CONNECTION ERROR:", error.message);
     
