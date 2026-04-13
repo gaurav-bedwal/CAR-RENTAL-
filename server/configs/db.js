@@ -21,11 +21,32 @@ const connectDB = async () => {
       socketTimeoutMS: 30000,
     };
 
-    await mongoose.connect(`${process.env.MONGODB_URI}/car-rental`, options);
+    // Robust URI handling: Only append DB name if not already present
+    let connectionString = process.env.MONGODB_URI;
+    if (!connectionString.includes('/car-rental')) {
+        // If there's a query param (?), insert DB name before it
+        if (connectionString.includes('?')) {
+            connectionString = connectionString.replace('?', '/car-rental?');
+        } else {
+            // Ensure trailing slash or append
+            connectionString = connectionString.endsWith('/') 
+                ? `${connectionString}car-rental` 
+                : `${connectionString}/car-rental`;
+        }
+    }
+
+    await mongoose.connect(connectionString, options);
   } catch (error) {
     console.error("❌ MONGODB CONNECTION ERROR:", error.message);
-    console.error("👉 TROUBLESHOOTING STEP: Ensure your current IP is whitelisted in MongoDB Atlas (Network Access).");
-    console.error("👉 Current URI:", process.env.MONGODB_URI?.replace(/:([^:@]+)@/, ':****@')); // Log URI safely
+    
+    let advice = "Ensure your current IP is whitelisted (0.0.0.0/0) in MongoDB Atlas.";
+    if (error.message.includes("Authentication failed")) {
+        advice = "Incorrect Username or Password in MONGODB_URI.";
+    } else if (error.message.includes("ENOTFOUND")) {
+        advice = "Could not reach MongoDB. Check your MONGODB_URI for typos.";
+    }
+
+    console.error("👉 TROUBLESHOOTING STEP:", advice);
     throw error;
   }
 };
