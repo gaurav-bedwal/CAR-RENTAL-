@@ -28,6 +28,7 @@ export const AppProvider = ({ children })=>{
     const [dbMessage, setDbMessage] = useState('')
 
     // Function to check if user is logged in
+    const fetchUser = async ()=>{
         try {
            setIsDbConnected(true)
            const {data} = await axios.get('/api/user/data')
