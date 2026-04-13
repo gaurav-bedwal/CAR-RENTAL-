@@ -23,7 +23,14 @@ const connectDB = async () => {
       socketTimeoutMS: 30000,
     };
 
-    await mongoose.connect(process.env.MONGODB_URI, options);
+    // Clean up malformed URIs. If the Vercel Env Var has double slashes, Mongoose throws an Invalid Namespace error.
+    let safeUri = process.env.MONGODB_URI || "";
+    // Remove accidental database names from the URI since we use dbName option
+    safeUri = safeUri.replace(/\/car-rental/g, ""); 
+    // Fix any double slashes after the ".net" domain
+    safeUri = safeUri.replace(/\.net\/\/+/g, ".net/");
+
+    await mongoose.connect(safeUri, options);
   } catch (error) {
     console.error("❌ MONGODB CONNECTION ERROR:", error.message);
     
