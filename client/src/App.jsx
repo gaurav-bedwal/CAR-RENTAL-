@@ -49,7 +49,7 @@ const App = () => {
 
     {!isOwnerPath && <Footer />}
     
-    </>
+    </div>
   )
 }
 
