@@ -35,7 +35,7 @@ const Login = () => {
                     localStorage.setItem('token', data.token)
                     setShowLogin(false)
                 } else {
-                    toast.error(data.message)
+                    toast.error(data.message || "Login failed")
                 }
             } 
             else if (state === 'forgot_email') {
@@ -60,7 +60,8 @@ const Login = () => {
             }
 
         } catch (error) {
-            toast.error(error.message)
+            const errorMsg = error.response?.data?.message || error.message || "An unexpected error occurred";
+            toast.error(errorMsg)
         }
 
     }

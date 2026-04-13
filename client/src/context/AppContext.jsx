@@ -4,7 +4,10 @@ import axios from 'axios'
 import {toast} from 'react-hot-toast'
 import { useNavigate } from "react-router-dom";
 
-axios.defaults.baseURL = import.meta.env.VITE_BASE_URL
+// Production-safe Base URL logic
+// If VITE_BASE_URL is not set or points to localhost in production, use relative paths
+const backendUrl = import.meta.env.VITE_BASE_URL
+axios.defaults.baseURL = (import.meta.env.PROD && (!backendUrl || backendUrl.includes('localhost'))) ? '' : backendUrl
 
 export const AppContext = createContext();
 

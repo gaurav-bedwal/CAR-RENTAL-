@@ -3,12 +3,25 @@ import "dotenv/config";
 import cors from "cors";
 import morgan from "morgan";
 import connectDB from "./configs/db.js";
+import mongoose from "mongoose";
 import userRouter from "./routes/userRoutes.js";
 import ownerRouter from "./routes/ownerRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
 
+// Database Connection Check Middleware
+const dbCheck = (req, res, next) => {
+    if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+            success: false,
+            message: "Database not connected. Please ensure your IP is whitelisted in MongoDB Atlas.",
+            status: "disconnected"
+        });
+    }
+    next();
+};
+
 // Initialize Express App
-const app = express()
+const app = express();
 
 // Middleware
 app.use(cors({
@@ -21,6 +34,10 @@ app.use(express.json());
 
 // Routes
 app.get('/', (req, res)=> res.send("Server is running"))
+
+// Apply DB check to all API routes
+app.use('/api', dbCheck)
+
 app.use('/api/user', userRouter)
 app.use('/api/owner', ownerRouter)
 app.use('/api/bookings', bookingRouter)
