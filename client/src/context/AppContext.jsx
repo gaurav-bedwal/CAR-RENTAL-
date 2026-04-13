@@ -36,7 +36,8 @@ export const AppProvider = ({ children })=>{
             navigate('/')
            }
         } catch (error) {
-            toast.error(error.message)
+            const errorMsg = error.response?.data?.message || error.message || "User verification failed";
+            toast.error(errorMsg)
         }
     }
     // Function to fetch all cars from the server
@@ -46,7 +47,8 @@ export const AppProvider = ({ children })=>{
             const {data} = await axios.get('/api/user/cars')
             data.success ? setCars(data.cars) : toast.error(data.message)
         } catch (error) {
-            toast.error(error.message)
+            const errorMsg = error.response?.data?.message || error.message || "Failed to load cars";
+            toast.error(errorMsg)
         }
     }
 
