@@ -24,10 +24,12 @@ export const AppProvider = ({ children })=>{
     const [returnDate, setReturnDate] = useState('')
 
     const [cars, setCars] = useState([])
+    const [isDbConnected, setIsDbConnected] = useState(true)
+    const [dbMessage, setDbMessage] = useState('')
 
     // Function to check if user is logged in
-    const fetchUser = async ()=>{
         try {
+           setIsDbConnected(true)
            const {data} = await axios.get('/api/user/data')
            if (data.success) {
             setUser(data.user)
@@ -37,6 +39,10 @@ export const AppProvider = ({ children })=>{
            }
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.message || "User verification failed";
+            if (error.response?.status === 503 || errorMsg.toLowerCase().includes('database')) {
+                setIsDbConnected(false)
+                setDbMessage(errorMsg)
+            }
             toast.error(errorMsg)
         }
     }
@@ -44,10 +50,19 @@ export const AppProvider = ({ children })=>{
 
     const fetchCars = async () =>{
         try {
+            setIsDbConnected(true)
             const {data} = await axios.get('/api/user/cars')
-            data.success ? setCars(data.cars) : toast.error(data.message)
+            if (data.success) {
+                setCars(data.cars)
+            } else {
+                toast.error(data.message)
+            }
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.message || "Failed to load cars";
+            if (error.response?.status === 503 || errorMsg.toLowerCase().includes('database')) {
+                setIsDbConnected(false)
+                setDbMessage(errorMsg)
+            }
             toast.error(errorMsg)
         }
     }
@@ -80,7 +95,8 @@ export const AppProvider = ({ children })=>{
     const value = {
         navigate, currency, axios, user, setUser,
         token, setToken, isAdmin, setIsAdmin, fetchUser, showLogin, setShowLogin, logout, fetchCars, cars, setCars, 
-        pickupDate, setPickupDate, returnDate, setReturnDate, assets
+        pickupDate, setPickupDate, returnDate, setReturnDate, assets,
+        isDbConnected, dbMessage
     }
 
     return (
