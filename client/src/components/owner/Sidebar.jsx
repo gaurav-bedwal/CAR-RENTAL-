@@ -50,7 +50,7 @@ const Sidebar = () => {
       )}
       <p className='mt-2 text-base font-medium text-white max-md:hidden'>{user?.name}</p>
 
-      <div className='w-full mt-8'>
+      <div className='w-full mt-8 flex flex-col flex-grow'>
         {visibleLinks.map((link, index) => (
           <NavLink key={index} to={link.path} className={`relative flex items-center gap-3 w-full py-4 pl-6 transition-all duration-300 ${link.path === location.pathname ? 'bg-primary/10 text-primary font-semibold' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}>
             <img src={link.path === location.pathname ? link.coloredIcon : link.icon} alt="icon" className={`w-5 h-5 ${link.path === location.pathname ? 'opacity-100' : 'opacity-60'}`} />
@@ -58,7 +58,18 @@ const Sidebar = () => {
             <div className={`${link.path === location.pathname && 'bg-primary shadow-[0_0_15px_rgba(212,175,55,0.8)]'} w-1 h-full rounded-full -left-0.5 absolute`}></div>
           </NavLink>
         ))}
+
+        {/* Home Navigation */}
+        <div className='mt-auto w-full border-t border-white/5'>
+          <NavLink to="/" className="relative flex items-center gap-3 w-full py-4 pl-6 transition-all duration-300 text-gray-400 hover:bg-white/5 hover:text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 opacity-60">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+            <span className='max-md:hidden tracking-wider'>Back to Home</span>
+          </NavLink>
+        </div>
       </div>
+
     </div>
   )
 }
