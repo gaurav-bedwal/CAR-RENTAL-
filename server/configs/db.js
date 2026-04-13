@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 // Enable command buffering globally so operations wait for DB connection
 mongoose.set('bufferCommands', true);
 const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    console.error("❌ MONGODB_URI is not defined in Environment Variables.");
+    return; // Don't try to connect, let dbCheck handle the status
+  }
   try {
 
     mongoose.connection.on('connected', () => console.log("✅ Database Connected"));

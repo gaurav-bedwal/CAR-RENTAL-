@@ -11,9 +11,12 @@ import bookingRouter from "./routes/bookingRoutes.js";
 // Database Connection Check Middleware
 const dbCheck = (req, res, next) => {
     if (mongoose.connection.readyState !== 1) {
+        const isMissingUri = !process.env.MONGODB_URI;
         return res.status(503).json({
             success: false,
-            message: "Database not connected. Please ensure your IP is whitelisted in MongoDB Atlas.",
+            message: isMissingUri 
+                ? "MONGODB_URI is missing. Please add it to your Vercel Environment Variables." 
+                : "Database not connected. Please ensure your IP is whitelisted (0.0.0.0/0) in MongoDB Atlas.",
             status: "disconnected"
         });
     }
