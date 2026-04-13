@@ -38,14 +38,12 @@ const ManageCars = () => {
     }
   }
 
-  const deleteCar = async (carId)=>{
+  const [deletingCarId, setDeletingCarId] = useState(null)
+
+  const deleteCar = async ()=>{
+    if(!deletingCarId) return;
     try {
-
-      const confirm = window.confirm('Are you sure you want to delete this car?')
-
-      if(!confirm) return null
-
-      const {data} = await axios.post('/api/owner/delete-car', {carId})
+      const {data} = await axios.post('/api/owner/delete-car', {carId: deletingCarId})
       if(data.success){
         toast.success(data.message)
         fetchOwnerCars()
@@ -54,6 +52,8 @@ const ManageCars = () => {
       }
     } catch (error) {
       toast.error(error.message)
+    } finally {
+      setDeletingCarId(null)
     }
   }
 
@@ -136,7 +136,7 @@ const ManageCars = () => {
                     <button onClick={()=> toggleAvailability(car._id)} className='p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors opacity-80 hover:opacity-100' title={car.isAvaliable ? "Hide Car" : "Show Car"}>
                       <img src={car.isAvaliable ? assets.eye_close_icon : assets.eye_icon} alt="" className='w-5 h-5 filter invert'/>
                     </button>
-                    <button onClick={()=> deleteCar(car._id)} className='p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors' title="Delete Car">
+                    <button onClick={()=> setDeletingCarId(car._id)} className='p-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors' title="Delete Car">
                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                       </svg>
@@ -151,6 +151,25 @@ const ManageCars = () => {
 
         {cars.length === 0 && <div className='p-8 text-center text-gray-500 italic'>No cars listed yet.</div>}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingCarId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#111] border border-red-500/20 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative p-8 text-center">
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-500/10 mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-red-500">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">Delete Car?</h3>
+            <p className="text-gray-400 text-sm mb-8">This action cannot be undone. This will permanently remove the car and delete any bookings associated with it.</p>
+            <div className="flex gap-3 justify-center">
+              <button onClick={() => setDeletingCarId(null)} className="px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors font-medium w-full">Cancel</button>
+              <button onClick={deleteCar} className="px-5 py-2.5 rounded-xl bg-red-500/80 text-white font-bold hover:bg-red-500 transition-colors w-full shadow-lg shadow-red-500/20">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editingCar && (
@@ -247,3 +266,4 @@ const ManageCars = () => {
 }
 
 export default ManageCars
+

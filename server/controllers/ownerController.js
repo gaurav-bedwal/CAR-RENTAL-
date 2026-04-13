@@ -150,6 +150,9 @@ export const deleteCar = async (req, res) =>{
         const {carId} = req.body
         await Car.findByIdAndDelete(carId);
 
+        // Clean up orphaned bookings associated with the deleted car
+        await Booking.deleteMany({ car: carId });
+
         res.json({success: true, message: "Car Removed"})
     } catch (error) {
         console.log(error.message);

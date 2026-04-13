@@ -94,9 +94,19 @@ const ManageBookings = () => {
                         </button>
                      </div>
                   ): (
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${booking.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                      {booking.status}
-                    </span>
+                    <div className="flex items-center gap-3">
+                       <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${booking.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                         {booking.status}
+                       </span>
+                       {booking.status === 'confirmed' && (
+                         <button 
+                            onClick={() => changeBookingStatus(booking._id, 'cancelled')}
+                            className="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors font-semibold text-xs uppercase tracking-wider"
+                         >
+                            Cancel
+                         </button>
+                       )}
+                    </div>
                   )}
                 </td>
 
