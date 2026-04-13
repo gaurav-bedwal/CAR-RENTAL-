@@ -67,7 +67,7 @@ const AddCar = () => {
   return (
     <div className='px-4 py-10 md:px-10 flex-1'>
 
-      <Title title={isAdmin ? "Add New Car" : "Request Car Listing"} subTitle={isAdmin ? "List a new car directly to the platform." : "Submit your car details to an administrator for review and approval."}/>
+      <Title title={isAdmin ? "Add New Car to Fleet" : "Request Car Listing"} subTitle={isAdmin ? "Add a new vehicle directly to the platform's active fleet." : "Submit your car details to an administrator for review and approval."}/>
 
       <form onSubmit={onSubmitHandler} className='flex flex-col gap-5 text-gray-500 text-sm mt-6 max-w-xl'>
 
@@ -77,7 +77,7 @@ const AddCar = () => {
             <img src={image ? URL.createObjectURL(image) : assets.upload_icon} alt="" className='h-14 rounded cursor-pointer'/>
             <input type="file" id="car-image" accept="image/*" hidden onChange={e=> setImage(e.target.files[0])}/>
           </label>
-          <p className='text-sm text-gray-500'>Upload a picture of your car</p>
+          <p className='text-sm text-gray-500'>Upload car image</p>
         </div>
 
         {/* Car Brand & Model */}
@@ -161,7 +161,7 @@ const AddCar = () => {
 
         <button className='flex items-center justify-center gap-2 px-6 py-3 mt-4 bg-primary text-[#0a0a0a] rounded-lg font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] hover:bg-primary-dull transition-all w-max cursor-pointer'>
           {isAdmin ? <img src={assets.tick_icon} alt="" className="brightness-0" /> : null}
-          {isLoading ? 'Processing...' : isAdmin ? 'List Your Car' : 'Submit Request'}
+          {isLoading ? 'Processing...' : isAdmin ? 'Add Car to Fleet' : 'Submit Request'}
         </button>
 
 

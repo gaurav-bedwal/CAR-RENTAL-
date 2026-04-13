@@ -62,7 +62,10 @@ const ManageBookings = () => {
                   <img src={booking.car?.image || assets.car_logo} alt="" className='h-12 w-12 xl:h-14 xl:w-14 aspect-square rounded-xl object-cover border border-white/10'/>
                   <div>
                     <p className='font-bold text-white tracking-wide'>{booking.car?.brand || 'Deleted'} {booking.car?.model || 'Car'}</p>
-                    <p className='text-xs text-gray-500 mt-1 uppercase tracking-wider'>{booking.user?.name || "Deleted User"}</p>
+                    <div className='flex flex-col mt-1'>
+                       <p className='text-xs text-primary uppercase tracking-wider font-semibold'>{booking.user?.name || "Deleted User"}</p>
+                       <p className='text-[11px] text-gray-500 tracking-wide lowercase'>{booking.user?.email || "No email"}</p>
+                    </div>
                   </div>
                 </td>
 
