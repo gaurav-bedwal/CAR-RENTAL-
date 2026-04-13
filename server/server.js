@@ -9,8 +9,11 @@ import ownerRouter from "./routes/ownerRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
 
 // Database Connection Check Middleware
-const dbCheck = (req, res, next) => {
-    if (mongoose.connection.readyState !== 1) {
+const dbCheck = async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (error) {
         const isMissingUri = !process.env.MONGODB_URI;
         return res.status(503).json({
             success: false,
@@ -20,7 +23,6 @@ const dbCheck = (req, res, next) => {
             status: "disconnected"
         });
     }
-    next();
 };
 
 // Initialize Express App
