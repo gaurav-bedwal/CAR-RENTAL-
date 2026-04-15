@@ -46,10 +46,10 @@ const BookingForm = () => {
                     <input 
                         value={pickupDate} 
                         onChange={e => setPickupDate(e.target.value)} 
-                        type="date" 
+                        type="datetime-local" 
                         id="pickup-date" 
-                        min={new Date().toISOString().split('T')[0]} 
-                        className='bg-transparent text-white text-lg font-medium outline-none w-full md:w-auto cursor-pointer border-b border-white/10 focus:border-primary pb-2 transition-all [color-scheme:dark]' 
+                        min={new Date().toISOString().slice(0, 16)} 
+                        className='bg-transparent text-white text-[15px] font-medium outline-none w-full md:w-auto cursor-pointer border-b border-white/10 focus:border-primary pb-2 transition-all [color-scheme:dark]' 
                         required 
                     />
                 </div>
@@ -61,10 +61,10 @@ const BookingForm = () => {
                     <input 
                         value={returnDate} 
                         onChange={e => setReturnDate(e.target.value)} 
-                        type="date" 
+                        type="datetime-local" 
                         id="return-date" 
-                        min={pickupDate || new Date().toISOString().split('T')[0]} 
-                        className='bg-transparent text-white text-lg font-medium outline-none w-full md:w-auto cursor-pointer border-b border-white/10 focus:border-primary pb-2 transition-all [color-scheme:dark]' 
+                        min={pickupDate || new Date().toISOString().slice(0, 16)} 
+                        className='bg-transparent text-white text-[15px] font-medium outline-none w-full md:w-auto cursor-pointer border-b border-white/10 focus:border-primary pb-2 transition-all [color-scheme:dark]' 
                         required 
                     />
                 </div>

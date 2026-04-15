@@ -16,13 +16,63 @@ const CarDetails = () => {
   const [car, setCar] = useState(null)
   const currency = import.meta.env.VITE_CURRENCY
 
+  const [bookingMode, setBookingMode] = useState('daily'); // 'daily' | 'hourly'
+  const [calculatedPrice, setCalculatedPrice] = useState(0);
+  const [totalDuration, setTotalDuration] = useState('');
+  const [bookingError, setBookingError] = useState('');
+
+  useEffect(() => {
+    if (pickupDate && returnDate && car) {
+      const p = new Date(pickupDate);
+      const r = new Date(returnDate);
+      const diffHrs = (r - p) / (1000 * 60 * 60);
+
+      if (diffHrs <= 0) {
+        setBookingError("Return time must be after pickup time.");
+        setCalculatedPrice(0);
+        setTotalDuration('');
+        return;
+      }
+
+      if (bookingMode === 'hourly') {
+        if (diffHrs > 6) {
+          setBookingError("Hourly reservations are strictly limited to a maximum of 6 hours.");
+          setCalculatedPrice(0);
+          setTotalDuration('');
+        } else {
+          setBookingError("");
+          const hrs = Math.ceil(diffHrs);
+          setCalculatedPrice(hrs * (car.pricePerHour || 0));
+          setTotalDuration(`${hrs} Hour${hrs > 1 ? 's' : ''}`);
+        }
+      } else {
+        setBookingError("");
+        const days = Math.max(1, Math.ceil(diffHrs / 24));
+        setCalculatedPrice(days * car.pricePerDay);
+        setTotalDuration(`${days} Day${days > 1 ? 's' : ''}`);
+      }
+    } else {
+      setCalculatedPrice(0);
+      setTotalDuration('');
+      setBookingError('');
+    }
+  }, [pickupDate, returnDate, bookingMode, car]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (bookingError) {
+        return toast.error(bookingError);
+      }
+      if (!calculatedPrice) {
+        return toast.error("Please select valid dates to calculate price.");
+      }
+
       const { data } = await axios.post('/api/bookings/create', {
         car: id,
         pickupDate,
-        returnDate
+        returnDate,
+        bookingMode // Transmit mode to ensure correct bill processing backend
       })
 
       if (data.success) {
@@ -107,7 +157,7 @@ const CarDetails = () => {
               <h1 className='text-xl md:text-2xl font-semibold text-white mb-4 tracking-wide'>Features</h1>
               <ul className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 {
-                  ["360 Camera", "Bluetooth", "GPS", "Heated Seats", "Rear View Mirror"].map((item) => (
+                  (car.features && car.features.length > 0 ? car.features : ["Bluetooth", "GPS", "Air Conditioning"]).map((item) => (
                     <li key={item} className='flex items-center text-gray-400 bg-[#0a0a0a] rounded-lg px-4 py-3 border border-white/5'>
                       <img src={assets.check_icon} className='h-4 mr-3 brightness-200 opacity-80' alt="" />
                       {item}
@@ -128,26 +178,67 @@ const CarDetails = () => {
 
           onSubmit={handleSubmit} className='bg-[#111] border border-white/5 shadow-2xl h-max lg:sticky lg:top-[100px] rounded-2xl p-6 md:p-8 space-y-6 text-gray-300'>
 
-          <p className='flex items-end justify-between font-semibold'>
-            <span className='text-3xl text-white font-bold tracking-tight'>{currency}{car.pricePerDay}</span>
-            <span className='text-sm text-gray-500 uppercase tracking-widest pb-1'>per day</span>
-          </p>
+          <div className='flex gap-2 p-1 bg-[#0a0a0a] rounded-xl border border-white/10'>
+             <button type="button" onClick={() => {setBookingMode('daily'); setReturnDate('');}} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${bookingMode === 'daily' ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>Daily</button>
+             <button type="button" onClick={() => {setBookingMode('hourly'); setReturnDate('');}} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${bookingMode === 'hourly' ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>Hourly (Max 6 hrs)</button>
+          </div>
 
-          <hr className='border-white/10 my-6' />
+          <div className='flex items-end justify-between font-semibold mt-4 bg-[#0a0a0a] p-4 rounded-xl border border-white/5'>
+             <div className='flex flex-col'>
+                <span className='text-sm text-gray-500 uppercase tracking-widest mb-1'>Rate ({bookingMode})</span>
+                {bookingMode === 'daily' ? (
+                  <span className='text-2xl text-white font-bold tracking-tight'>{currency}{car.pricePerDay} <span className="text-sm font-normal text-gray-500">/day</span></span>
+                ) : (
+                  <span className='text-2xl text-white font-bold tracking-tight'>{currency}{car.pricePerHour || 0} <span className="text-sm font-normal text-gray-500">/hr</span></span>
+                )}
+             </div>
+             {calculatedPrice > 0 && !bookingError && (
+               <div className='flex flex-col items-end'>
+                 <span className='text-primary text-[10px] uppercase font-black tracking-widest mb-1'>Total ({totalDuration})</span>
+                 <span className='text-3xl text-primary font-black tracking-tight'>{currency}{calculatedPrice}</span>
+               </div>
+             )}
+          </div>
 
+          <hr className='border-white/10 my-4' />
+          
           <div className='flex flex-col gap-2'>
-            <label htmlFor="pickup-date" className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Pickup Date</label>
+            <label htmlFor="pickup-date" className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Pickup Date & Time</label>
             <input value={pickupDate} onChange={(e) => setPickupDate(e.target.value)}
-              type="date" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='pickup-date' min={new Date().toISOString().split('T')[0]} />
+              type="datetime-local" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='pickup-date' min={new Date().toISOString().slice(0, 16)} />
           </div>
+
+          {bookingMode === 'hourly' && pickupDate && (
+             <div className='flex gap-2 mt-2'>
+                {[2, 4, 6].map(hrs => (
+                   <button type="button" key={hrs} 
+                     onClick={() => {
+                        const date = new Date(pickupDate);
+                        date.setHours(date.getHours() + hrs);
+                        // Convert back to local ISO-like string
+                        const tzoffset = date.getTimezoneOffset() * 60000;
+                        const localISOTime = (new Date(date - tzoffset)).toISOString().slice(0, 16);
+                        setReturnDate(localISOTime);
+                     }}
+                     className='flex-1 text-[10px] uppercase tracking-widest font-bold py-2 bg-[#0a0a0a] border border-white/10 hover:border-primary/50 rounded-lg text-gray-400 hover:text-white transition-colors'
+                   >
+                     +{hrs} Hrs
+                   </button>
+                ))}
+             </div>
+          )}
 
           <div className='flex flex-col gap-2'>
-            <label htmlFor="return-date" className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1 mt-2">Return Date</label>
+            <label htmlFor="return-date" className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1 mt-2">Return Date & Time</label>
             <input value={returnDate} onChange={(e) => setReturnDate(e.target.value)}
-              type="date" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='return-date' min={pickupDate || new Date().toISOString().split('T')[0]} />
+              type="datetime-local" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='return-date' min={pickupDate || new Date().toISOString().slice(0, 16)} />
           </div>
+          
+          {bookingError && (
+             <motion.p initial={{opacity: 0}} animate={{opacity: 1}} className="text-red-400 text-xs font-semibold bg-red-400/10 p-3 rounded-xl border border-red-400/20">{bookingError}</motion.p>
+          )}
 
-          <button className='w-full bg-primary hover:bg-primary-dull transition-all py-4 mt-4 font-bold tracking-wider uppercase text-sm text-[#0a0a0a] rounded-xl cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.3)] hover:shadow-[0_0_20px_rgba(212,175,55,0.5)]'>Book Now</button>
+          <button disabled={!!bookingError} className={`w-full transition-all py-4 mt-2 font-bold tracking-wider uppercase text-sm text-[#0a0a0a] rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.3)] ${bookingError ? 'bg-gray-600 cursor-not-allowed opacity-50 shadow-none' : 'bg-primary hover:bg-primary-dull cursor-pointer hover:shadow-[0_0_20px_rgba(212,175,55,0.5)]'}`}>Book Now</button>
 
           <p className='text-center text-xs text-gray-500 uppercase tracking-widest mt-4'>No credit card required to reserve</p>
 

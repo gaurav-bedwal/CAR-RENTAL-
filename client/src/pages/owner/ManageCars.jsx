@@ -186,15 +186,27 @@ const ManageCars = () => {
             </div>
             
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Price Per Day ({currency})</label>
-                <input 
-                  type="number" 
-                  name="pricePerDay" 
-                  value={editingCar.pricePerDay} 
-                  onChange={handleEditChange}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Daily Rate ({currency})</label>
+                  <input 
+                    type="number" 
+                    name="pricePerDay" 
+                    value={editingCar.pricePerDay} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Hourly Rate ({currency})</label>
+                  <input 
+                    type="number" 
+                    name="pricePerHour" 
+                    value={editingCar.pricePerHour || ''} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
               </div>
 
               <div>

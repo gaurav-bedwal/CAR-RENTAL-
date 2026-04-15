@@ -41,24 +41,35 @@ export const checkAvailabilityOfCar = async (req, res)=>{
 export const createBooking = async (req, res)=>{
     try {
         const {_id} = req.user;
-        const {car, pickupDate, returnDate} = req.body;
+        const {car, pickupDate, returnDate, bookingMode} = req.body;
 
         const isAvailable = await checkAvailability(car, pickupDate, returnDate)
         if(!isAvailable){
-            return res.json({success: false, message: "Car is not available"})
+            return res.json({success: false, message: "Car is not available for this specific timeframe"})
         }
 
         const carData = await Car.findById(car)
 
-        // Calculate price based on pickupDate and returnDate
+        // Calculate precise price based on strict datetime bounds
         const picked = new Date(pickupDate);
         const returned = new Date(returnDate);
-        const noOfDays = Math.ceil((returned - picked) / (1000 * 60 * 60 * 24))
-        const price = carData.pricePerDay * noOfDays;
+        const diffHrs = (returned - picked) / (1000 * 60 * 60);
 
-        await Booking.create({car, owner: carData.owner, user: _id, pickupDate, returnDate, price})
+        let price = 0;
+        if (bookingMode === 'hourly') {
+            if (diffHrs > 6) {
+                 return res.json({success: false, message: "Hourly bookings capped at 6 hours max."})
+            }
+            const hrs = Math.ceil(diffHrs);
+            price = hrs * (carData.pricePerHour || 0);
+        } else {
+            const noOfDays = Math.max(1, Math.ceil(diffHrs / 24))
+            price = carData.pricePerDay * noOfDays;
+        }
 
-        res.json({success: true, message: "Booking Created"})
+        await Booking.create({car, owner: carData.owner, user: _id, pickupDate, returnDate, price, bookingMode: bookingMode || 'daily'})
+
+        res.json({success: true, message: "Booking Verified & Securely Created"})
 
     } catch (error) {
         console.log(error.message);

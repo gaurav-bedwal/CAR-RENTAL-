@@ -14,6 +14,7 @@ const AddCar = () => {
     model: '',
     year: 0,
     pricePerDay: 0,
+    pricePerHour: 0,
     category: '',
     transmission: '',
     fuel_type: '',
@@ -66,6 +67,7 @@ const AddCar = () => {
           model: '',
           year: 0,
           pricePerDay: 0,
+          pricePerHour: 0,
           category: '',
           transmission: '',
           fuel_type: '',
@@ -131,7 +133,11 @@ const AddCar = () => {
           </div>
           <div className='flex flex-col w-full'>
             <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Daily Rate ({currency})</label>
-            <input type="number" placeholder="100" required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.pricePerDay} onChange={e=> setCar({...car, pricePerDay: e.target.value})}/>
+            <input type="number" placeholder="5000" className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' required value={car.pricePerDay} onChange={e=> setCar({...car, pricePerDay: e.target.value})}/>
+          </div>
+          <div className='flex flex-col w-full'>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Hourly Rate ({currency})</label>
+            <input type="number" placeholder="250" className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' required value={car.pricePerHour} onChange={e=> setCar({...car, pricePerHour: e.target.value})}/>
           </div>
           <div className='flex flex-col w-full'>
             <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Category</label>
