@@ -187,7 +187,8 @@ export const getDashboardData = async (req, res) =>{
             pendingBookings: pendingBookings.length,
             completedBookings: completedBookings.length,
             recentBookings: bookings.slice(0,3),
-            monthlyRevenue
+            monthlyRevenue,
+            allCars: cars
         }
 
         res.json({ success: true, dashboardData });

@@ -152,11 +152,10 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-             {data.recentBookings.length > 0 && Array.from(new Set(data.recentBookings.filter(b => b.car).map(b => b.car._id))).slice(0, 6).map((carId) => {
-               const car = data.recentBookings.find(b => b.car?._id === carId)?.car;
+             {data.allCars && data.allCars.slice(0, 6).map((car) => {
                if (!car) return null;
                return (
-                 <div key={carId} className='p-4 bg-[#0B0D17] border border-white/5 rounded-2xl flex items-center justify-between hover:border-red-500/30 transition-all duration-300'>
+                 <div key={car._id} className='p-4 bg-[#0B0D17] border border-white/5 rounded-2xl flex items-center justify-between hover:border-red-500/30 transition-all duration-300'>
                    <div className='flex items-center gap-3'>
                       <img src={car.image} alt="" className='w-12 h-12 rounded-xl object-cover border border-white/10' />
                       <div>
@@ -177,7 +176,8 @@ const Dashboard = () => {
                )
              })}
           </div>
-          <p className='mt-6 text-[10px] text-gray-500 italic'>* This section displays cars from recent booking activity for rapid access.</p>
+          {(!data.allCars || data.allCars.length === 0) && <p className='mt-6 text-[10px] text-gray-500 italic'>No cars currently exist in the platform fleet.</p>}
+          {(data.allCars && data.allCars.length > 0) && <p className='mt-6 text-[10px] text-gray-500 italic'>* This section displays cars from your fleet for rapid access.</p>}
       </div>
 
     </div>
