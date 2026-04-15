@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 
 const AddCar = () => {
 
-  const {axios, currency, isAdmin} = useAppContext()
+  const {axios, currency, isAdmin, fetchCars} = useAppContext()
 
   const [image, setImage] = useState(null)
   const [car, setCar] = useState({
@@ -66,6 +66,7 @@ const AddCar = () => {
 
       if(data.success){
         toast.success(data.message)
+        fetchCars()
         setImage(null)
         setCar({
           brand: '',

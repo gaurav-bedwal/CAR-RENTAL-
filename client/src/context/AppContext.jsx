@@ -16,7 +16,7 @@ export const AppProvider = ({ children })=>{
     const navigate = useNavigate()
     const currency = import.meta.env.VITE_CURRENCY
 
-    const [token, setToken] = useState(null)
+    const [token, setToken] = useState(sessionStorage.getItem('token') || null)
     const [user, setUser] = useState(null)
     const [isAdmin, setIsAdmin] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
@@ -87,11 +87,16 @@ export const AppProvider = ({ children })=>{
         fetchCars()
     },[])
 
-    // useEffect to fetch user data when token is available
+    // Sync token to sessionStorage to allow page refreshing without logging out,
+    // while strictly keeping the session isolated to the current tab.
     useEffect(()=>{
         if(token){
+            sessionStorage.setItem('token', token)
             axios.defaults.headers.common['Authorization'] = `${token}`
             fetchUser()
+        } else {
+            sessionStorage.removeItem('token')
+            axios.defaults.headers.common['Authorization'] = ''
         }
     },[token])
 

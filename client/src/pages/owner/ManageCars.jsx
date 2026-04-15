@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 
 const ManageCars = () => {
 
-  const {isAdmin, axios, currency} = useAppContext()
+  const {isAdmin, axios, currency, fetchCars} = useAppContext()
 
   const [cars, setCars] = useState([])
   const [editingCar, setEditingCar] = useState(null)
@@ -49,6 +49,7 @@ const ManageCars = () => {
       if(data.success){
         toast.success(data.message)
         fetchOwnerCars()
+        fetchCars()
       }else{
         toast.error(data.message)
       }
@@ -66,6 +67,7 @@ const ManageCars = () => {
       if(data.success){
         toast.success(data.message)
         fetchOwnerCars()
+        fetchCars()
       }else{
         toast.error(data.message)
       }
@@ -95,6 +97,7 @@ const ManageCars = () => {
         toast.success(data.message)
         setEditingCar(null)
         fetchOwnerCars()
+        fetchCars()
       } else {
         toast.error(data.message)
       }
