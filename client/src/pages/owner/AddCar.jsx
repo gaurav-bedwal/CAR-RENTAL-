@@ -22,7 +22,9 @@ const AddCar = () => {
     location: '',
     description: '',
     features: [],
-    rtoDate: ''
+    threeSixtyImages: '',
+    rtoDate: '',
+    image: '' // For URL-based images
   })
 
   const calculateAge = (dateString) => {
@@ -42,8 +44,8 @@ const AddCar = () => {
     e.preventDefault()
     if(isLoading) return null
 
-    if(!image){
-      return toast.error("Please upload an image for the car")
+    if(!image && !car.image){
+      return toast.error("Please upload an image or provide a valid URL")
     }
 
     setIsLoading(true)
@@ -52,7 +54,10 @@ const AddCar = () => {
       formData.append('image', image)
       const carDataToSubmit = {
         ...car,
-        year: calculateAge(car.rtoDate) // Save calculated age to backend year schema metric
+        year: calculateAge(car.rtoDate),
+        threeSixtyImages: typeof car.threeSixtyImages === 'string' 
+          ? car.threeSixtyImages.split('\n').filter(url => url.trim() !== '') 
+          : car.threeSixtyImages
       }
 
       formData.append('carData', JSON.stringify(carDataToSubmit))
@@ -75,7 +80,9 @@ const AddCar = () => {
           location: '',
           description: '',
           features: [],
-          rtoDate: ''
+          threeSixtyImages: '',
+          rtoDate: '',
+          image: ''
         })
       }else{
         toast.error(data.message)
@@ -95,20 +102,35 @@ const AddCar = () => {
       <form onSubmit={onSubmitHandler} className='flex flex-col gap-8 text-gray-400 text-sm mt-10 max-w-2xl'>
 
         {/* Car Image Profile */}
-        <div className='flex items-center gap-6 p-6 rounded-3xl bg-[#141824]/40 border border-white/5 backdrop-blur-sm'>
-          <label htmlFor="car-image" className='relative group cursor-pointer'>
-            <div className='w-24 h-24 rounded-2xl overflow-hidden border-2 border-dashed border-white/20 group-hover:border-primary/50 transition-all flex items-center justify-center bg-[#0B0D17]'>
-              {image ? (
-                <img src={URL.createObjectURL(image)} alt="" className='w-full h-full object-cover' />
-              ) : (
-                <img src={assets.upload_icon} alt="" className='w-8 h-8 opacity-40 group-hover:opacity-100 transition-opacity' />
-              )}
+        <div className='flex flex-col gap-6 p-6 rounded-3xl bg-[#141824]/40 border border-white/5 backdrop-blur-sm'>
+          <div className="flex items-center gap-6">
+            <label htmlFor="car-image" className='relative group cursor-pointer'>
+              <div className='w-24 h-24 rounded-2xl overflow-hidden border-2 border-dashed border-white/20 group-hover:border-primary/50 transition-all flex items-center justify-center bg-[#0B0D17]'>
+                {image ? (
+                  <img src={URL.createObjectURL(image)} alt="" className='w-full h-full object-cover' />
+                ) : car.image ? (
+                  <img src={car.image} alt="" className='w-full h-full object-cover' />
+                ) : (
+                  <img src={assets.upload_icon} alt="" className='w-8 h-8 opacity-40 group-hover:opacity-100 transition-opacity' />
+                )}
+              </div>
+              <input type="file" id="car-image" accept="image/*" hidden onChange={e=> {setImage(e.target.files[0]); setCar({...car, image: ''})}}/>
+            </label>
+            <div>
+              <p className='text-white font-bold text-lg tracking-tight'>Vehicle Visual</p>
+              <p className='text-xs text-gray-500 mt-1 max-w-xs'>Upload a file or provide a direct link below.</p>
             </div>
-            <input type="file" id="car-image" accept="image/*" hidden onChange={e=> setImage(e.target.files[0])}/>
-          </label>
-          <div>
-             <p className='text-white font-bold text-lg tracking-tight'>Vehicle Visual</p>
-             <p className='text-xs text-gray-500 mt-1 max-w-xs'>Upload a high-quality image of the car for better platform conversion.</p>
+          </div>
+          
+          <div className='flex flex-col w-full'>
+            <label className='text-[9px] uppercase tracking-widest text-primary font-black mb-2'>Direct Image URL (Alternative)</label>
+            <input 
+              type="text" 
+              placeholder="https://images.unsplash.com/photo-xxx" 
+              className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all text-xs' 
+              value={car.image} 
+              onChange={e=> {setCar({...car, image: e.target.value}); setImage(null)}}
+            />
           </div>
         </div>
 
@@ -194,6 +216,22 @@ const AddCar = () => {
             <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Detailed Description</label>
             <textarea rows={5} placeholder="Briefly describe the vehicle's unique features, condition, and optional extras..." required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all resize-none' value={car.description} onChange={e=> setCar({...car, description: e.target.value})}></textarea>
           </div>
+
+        {/* 360 Vision Images */}
+        <div className='flex flex-col w-full p-6 rounded-3xl bg-primary/5 border border-primary/10 backdrop-blur-sm'>
+            <div className='flex items-center gap-3 mb-4'>
+               <div className='w-2 h-2 rounded-full bg-primary animate-pulse'></div>
+               <label className='text-[10px] uppercase tracking-[0.2em] text-primary font-black'>360° Vision Data (Interactive View)</label>
+            </div>
+            <p className='text-xs text-gray-500 mb-4 leading-relaxed'>To enable the interactive 360° rotation, paste each image URL on a <span className='text-white font-semibold'>new line</span>. Professional sets usually contain 24-36 frames.</p>
+            <textarea 
+              rows={6} 
+              placeholder="https://example.com/frame_1.jpg&#10;https://example.com/frame_2.jpg&#10;..." 
+              className='px-4 py-4 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all resize-none font-mono text-xs custom-scrollbar' 
+              value={car.threeSixtyImages} 
+              onChange={e=> setCar({...car, threeSixtyImages: e.target.value})}
+            ></textarea>
+        </div>
 
         {/* Custom Admin Features */}
         {isAdmin && (

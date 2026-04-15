@@ -12,6 +12,7 @@ import AddCar from './pages/owner/AddCar'
 import ManageCars from './pages/owner/ManageCars'
 import ManageBookings from './pages/owner/ManageBookings'
 import Login from './components/Login'
+import Chatbot from './components/Chatbot'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
 
@@ -22,6 +23,7 @@ const App = () => {
 
   return (
     <div className='min-h-screen relative'>
+     <Chatbot />
      <Toaster />
       {!isDbConnected && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 backdrop-blur-md rounded-full shadow-lg transition-all animate-pulse">
@@ -29,6 +31,8 @@ const App = () => {
             <p className="text-xs font-medium text-red-100 uppercase tracking-widest">{dbMessage || "Database Disconnected"}</p>
         </div>
       )}
+
+      <Chatbot />
 
       {showLogin && <Login/>}
 

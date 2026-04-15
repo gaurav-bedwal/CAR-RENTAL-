@@ -4,13 +4,20 @@ import { assets, dummyCarData } from '../assets/assets'
 import Loader from '../components/Loader'
 import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
+import Car360Viewer from '../components/Car360Viewer'
 
 const CarDetails = () => {
 
   const { id } = useParams()
 
   const { cars, axios, pickupDate, setPickupDate, returnDate, setReturnDate } = useAppContext()
+
+  const getLocalISOString = () => {
+    const now = new Date();
+    const tzoffset = now.getTimezoneOffset() * 60000;
+    return (new Date(now - tzoffset)).toISOString().slice(0, 16);
+  };
 
   const navigate = useNavigate()
   const [car, setCar] = useState(null)
@@ -20,6 +27,7 @@ const CarDetails = () => {
   const [calculatedPrice, setCalculatedPrice] = useState(0);
   const [totalDuration, setTotalDuration] = useState('');
   const [bookingError, setBookingError] = useState('');
+  const [viewMode, setViewMode] = useState('static'); // 'static' | '360'
 
   useEffect(() => {
     if (pickupDate && returnDate && car) {
@@ -34,6 +42,10 @@ const CarDetails = () => {
         return;
       }
 
+      // Automatically suggest/switch to hourly if same day and <= 6 hours
+      // but only if the user hasn't explicitly chosen a mode or if it's clearly an hourly intent
+      const isSameDay = p.toDateString() === r.toDateString();
+      
       if (bookingMode === 'hourly') {
         if (diffHrs > 6) {
           setBookingError("Hourly reservations are strictly limited to a maximum of 6 hours.");
@@ -42,13 +54,14 @@ const CarDetails = () => {
         } else {
           setBookingError("");
           const hrs = Math.ceil(diffHrs);
-          setCalculatedPrice(hrs * (car.pricePerHour || 0));
+          const rate = car.pricePerHour > 0 ? car.pricePerHour : Math.ceil(car.pricePerDay / 10); // Fallback to 10% of daily if not set
+          setCalculatedPrice(hrs * rate);
           setTotalDuration(`${hrs} Hour${hrs > 1 ? 's' : ''}`);
         }
       } else {
         setBookingError("");
         const days = Math.max(1, Math.ceil(diffHrs / 24));
-        setCalculatedPrice(days * car.pricePerDay);
+        setCalculatedPrice(days * (car.pricePerDay || 0));
         setTotalDuration(`${days} Day${days > 1 ? 's' : ''}`);
       }
     } else {
@@ -64,8 +77,8 @@ const CarDetails = () => {
       if (bookingError) {
         return toast.error(bookingError);
       }
-      if (!calculatedPrice) {
-        return toast.error("Please select valid dates to calculate price.");
+      if (calculatedPrice <= 0 && !bookingError) {
+        return toast.error("Pricing information is missing for this selection. Please try another vehicle.");
       }
 
       const { data } = await axios.post('/api/bookings/create', {
@@ -106,14 +119,52 @@ const CarDetails = () => {
           transition={{ duration: 0.6 }}
 
           className='lg:col-span-2'>
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/5">
-            <motion.img
-              initial={{ scale: 0.98, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-
-              src={car.image} alt="" className='w-full h-auto md:max-h-120 object-cover' />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60"></div>
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl mb-8 border border-white/5 bg-[#0a0a0a]">
+            <AnimatePresence mode='wait'>
+              {viewMode === 'static' ? (
+                <motion.img
+                  key="static"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  src={car.image} 
+                  alt="" 
+                  className='w-full h-auto md:max-h-120 object-cover' 
+                />
+              ) : (
+                <motion.div
+                  key="360"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Car360Viewer images={car.threeSixtyImages} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {car.threeSixtyImages && car.threeSixtyImages.length > 0 && (
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                 <button 
+                  type="button"
+                  onClick={() => setViewMode('static')}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === 'static' ? 'bg-primary text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                 >
+                   Photo
+                 </button>
+                 <button 
+                  type="button"
+                  onClick={() => setViewMode('360')}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === '360' ? 'bg-primary text-black shadow-[0_0_15px_rgba(212,175,55,0.4)]' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                 >
+                   360° View
+                 </button>
+              </div>
+            )}
+            
+            {viewMode === 'static' && <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] to-transparent opacity-60 pointer-events-none"></div>}
           </div>
 
           <motion.div className='space-y-8 bg-[#111] p-8 rounded-2xl border border-white/5 shadow-xl'
@@ -179,8 +230,8 @@ const CarDetails = () => {
           onSubmit={handleSubmit} className='bg-[#111] border border-white/5 shadow-2xl h-max lg:sticky lg:top-[100px] rounded-2xl p-6 md:p-8 space-y-6 text-gray-300'>
 
           <div className='flex gap-2 p-1 bg-[#0a0a0a] rounded-xl border border-white/10'>
-             <button type="button" onClick={() => {setBookingMode('daily'); setReturnDate('');}} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${bookingMode === 'daily' ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>Daily</button>
-             <button type="button" onClick={() => {setBookingMode('hourly'); setReturnDate('');}} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${bookingMode === 'hourly' ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>Hourly (Max 6 hrs)</button>
+             <button type="button" onClick={() => setBookingMode('daily')} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${bookingMode === 'daily' ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>Daily</button>
+             <button type="button" onClick={() => setBookingMode('hourly')} className={`flex-1 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${bookingMode === 'hourly' ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>Hourly (Max 6 hrs)</button>
           </div>
 
           <div className='flex items-end justify-between font-semibold mt-4 bg-[#0a0a0a] p-4 rounded-xl border border-white/5'>
@@ -205,7 +256,7 @@ const CarDetails = () => {
           <div className='flex flex-col gap-2'>
             <label htmlFor="pickup-date" className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1">Pickup Date & Time</label>
             <input value={pickupDate} onChange={(e) => setPickupDate(e.target.value)}
-              type="datetime-local" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='pickup-date' min={new Date().toISOString().slice(0, 16)} />
+              type="datetime-local" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='pickup-date' min={getLocalISOString()} />
           </div>
 
           {bookingMode === 'hourly' && pickupDate && (
@@ -231,7 +282,7 @@ const CarDetails = () => {
           <div className='flex flex-col gap-2'>
             <label htmlFor="return-date" className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-1 mt-2">Return Date & Time</label>
             <input value={returnDate} onChange={(e) => setReturnDate(e.target.value)}
-              type="datetime-local" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='return-date' min={pickupDate || new Date().toISOString().slice(0, 16)} />
+              type="datetime-local" className='border border-white/10 bg-[#0a0a0a] text-white px-4 py-3 rounded-xl focus:border-primary/50 outline-none transition-colors [color-scheme:dark]' required id='return-date' min={pickupDate || getLocalISOString()} />
           </div>
           
           {bookingError && (

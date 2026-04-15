@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
     image: {type: String, default: ''},
     securityQuestion: {type: String, default: ''},
     securityAnswer: {type: String, default: ''},
+    currentSessionId: {type: String, default: ''},
 },{timestamps: true})
 
 const User = mongoose.model('User', userSchema)

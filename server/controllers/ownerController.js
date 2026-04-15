@@ -26,38 +26,48 @@ export const addCar = async (req, res)=>{
         if (!req.body.carData) {
             return res.json({ success: false, message: "Missing car data" });
         }
-        if (!req.file) {
-            return res.json({ success: false, message: "Please upload an image for the car" });
-        }
-
         let car = JSON.parse(req.body.carData);
-        const imageFile = req.file;
+        let image = '';
 
-        // Upload Image to ImageKit
-        const fileBuffer = fs.readFileSync(imageFile.path)
-        const response = await imagekit.upload({
-            file: fileBuffer,
-            fileName: imageFile.originalname,
-            folder: '/cars'
-        })
-
-        // optimization through imagekit URL transformation
-        var optimizedImageUrl = imagekit.url({
-            path : response.filePath,
-            transformation : [
-                {width: '1280'}, // Width resizing
-                {quality: 'auto'}, // Auto compression
-                { format: 'webp' }  // Convert to modern format
-            ]
-        });
-
-        const image = optimizedImageUrl;
+        if (req.file) {
+            const imageFile = req.file;
+            const fileBuffer = fs.readFileSync(imageFile.path)
+            const response = await imagekit.upload({
+                file: fileBuffer,
+                fileName: imageFile.originalname,
+                folder: '/cars'
+            })
+            image = imagekit.url({
+                path: response.filePath,
+                transformation: [{ width: '1280' }, { quality: 'auto' }, { format: 'webp' }]
+            });
+        } else if (car.image) {
+            // Upload from URL to ImageKit for consistency and optimization
+            try {
+                const response = await imagekit.upload({
+                    file: car.image, // ImageKit accepts URLs directly
+                    fileName: `car_url_${Date.now()}.jpg`,
+                    folder: '/cars'
+                })
+                image = imagekit.url({
+                    path: response.filePath,
+                    transformation: [{ width: '1280' }, { quality: 'auto' }, { format: 'webp' }]
+                });
+            } catch (err) {
+                // If remote upload fails, fallback to direct URL but warn
+                console.log("Remote upload failed, using direct URL:", err.message);
+                image = car.image;
+            }
+        } else {
+            return res.json({ success: false, message: "Please upload an image or provide a valid URL" });
+        }
         const isAdmin = req.user.role === 'admin';
         
         await Car.create({
             ...car, 
             owner: _id, 
             image,
+            threeSixtyImages: car.threeSixtyImages || [],
             isAvaliable: isAdmin, // Only immediately available if admin
             status: isAdmin ? 'approved' : 'pending' // Normal users are pending
         });
@@ -102,11 +112,20 @@ export const updateCar = async (req, res) => {
         }
 
         // Apply updates
+        if (updateData.brand) car.brand = updateData.brand;
+        if (updateData.model) car.model = updateData.model;
+        if (updateData.description) car.description = updateData.description;
+        if (updateData.location) car.location = updateData.location;
+        if (updateData.fuel_type) car.fuel_type = updateData.fuel_type;
+        if (updateData.rtoDate) car.rtoDate = updateData.rtoDate;
+        if (updateData.year) car.year = updateData.year;
         if (updateData.pricePerDay) car.pricePerDay = updateData.pricePerDay;
+        if (updateData.pricePerHour) car.pricePerHour = updateData.pricePerHour;
         if (updateData.category) car.category = updateData.category;
         if (updateData.seating_capacity) car.seating_capacity = updateData.seating_capacity;
         if (updateData.transmission) car.transmission = updateData.transmission;
         if (updateData.features) car.features = updateData.features;
+        if (updateData.threeSixtyImages) car.threeSixtyImages = updateData.threeSixtyImages;
         
         // Admin approving a car
         if (updateData.status) {

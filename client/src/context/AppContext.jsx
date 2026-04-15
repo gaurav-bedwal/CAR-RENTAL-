@@ -69,7 +69,6 @@ export const AppProvider = ({ children })=>{
     }
 
     const logout = ()=>{
-        localStorage.removeItem('token')
         setToken(null)
         setUser(null)
         setIsAdmin(false)
@@ -78,10 +77,13 @@ export const AppProvider = ({ children })=>{
     }
 
 
-    // useEffect to retrieve the token from localStorage
+    // UseEffect to fetch cars on initial load and clear legacy storage
     useEffect(()=>{
-        const token = localStorage.getItem('token')
-        setToken(token)
+        // SECURITY FIX: Explicitly clear any legacy storage from old versions of the site
+        // to ensure "Logout on Refresh" and "Individual Tab Sessions" are enforced.
+        localStorage.removeItem('token');
+        localStorage.clear(); // Complete wipe of legacy session data
+        
         fetchCars()
     },[])
 

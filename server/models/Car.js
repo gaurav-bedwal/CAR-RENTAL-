@@ -16,6 +16,7 @@ const carSchema = new mongoose.Schema({
     location: { type: String, required: true },
     description: { type: String, required: true },
     features: { type: [String], default: [] },
+    threeSixtyImages: { type: [String], default: [] },
     rtoDate: { type: Date },
     isAvaliable: {type: Boolean, default: true},
     status: { type: String, enum: ['pending', 'approved'], default: 'approved' }

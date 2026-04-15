@@ -5,9 +5,10 @@ import Car from "../models/Car.js";
 
 
 // Generate JWT Token
-const generateToken = (userId)=>{
-    const payload = userId;
-    return jwt.sign(payload, process.env.JWT_SECRET)
+// Generate JWT Token with Session Tracking
+const generateToken = (userId, sessionId)=>{
+    const payload = { id: userId, sessionId };
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '4h' })
 }
 
 // Register User
@@ -34,7 +35,11 @@ export const registerUser = async (req, res)=>{
             securityQuestion: securityQuestion || '', 
             securityAnswer: processedAnswer
         })
-        const token = generateToken(user._id.toString())
+        const sessionId = Date.now().toString()
+        user.currentSessionId = sessionId
+        await user.save()
+
+        const token = generateToken(user._id.toString(), sessionId)
         res.json({success: true, token, user})
 
     } catch (error) {
@@ -77,7 +82,12 @@ export const loginUser = async (req, res)=>{
         if(!isMatch){
             return res.json({success: false, message: "Invalid Credentials" })
         }
-        const token = generateToken(user._id.toString())
+        // Unique Session Tracking
+        const sessionId = Date.now().toString()
+        user.currentSessionId = sessionId
+        await user.save()
+
+        const token = generateToken(user._id.toString(), sessionId)
         res.json({success: true, token, user})
     } catch (error) {
         console.log(error.message);

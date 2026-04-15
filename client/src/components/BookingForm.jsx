@@ -7,6 +7,12 @@ const BookingForm = () => {
     const [pickupLocation, setPickupLocation] = useState('')
     const { pickupDate, setPickupDate, returnDate, setReturnDate, navigate } = useAppContext()
 
+    const getLocalISOString = () => {
+        const now = new Date();
+        const tzoffset = now.getTimezoneOffset() * 60000;
+        return (new Date(now - tzoffset)).toISOString().slice(0, 16);
+    };
+
     const handleSearch = (e) => {
         e.preventDefault()
         navigate('/cars?pickupLocation=' + pickupLocation + '&pickupDate=' + pickupDate + '&returnDate=' + returnDate)
@@ -48,7 +54,7 @@ const BookingForm = () => {
                         onChange={e => setPickupDate(e.target.value)} 
                         type="datetime-local" 
                         id="pickup-date" 
-                        min={new Date().toISOString().slice(0, 16)} 
+                        min={getLocalISOString()} 
                         className='bg-transparent text-white text-[15px] font-medium outline-none w-full md:w-auto cursor-pointer border-b border-white/10 focus:border-primary pb-2 transition-all [color-scheme:dark]' 
                         required 
                     />
@@ -63,7 +69,7 @@ const BookingForm = () => {
                         onChange={e => setReturnDate(e.target.value)} 
                         type="datetime-local" 
                         id="return-date" 
-                        min={pickupDate || new Date().toISOString().slice(0, 16)} 
+                        min={pickupDate || getLocalISOString()} 
                         className='bg-transparent text-white text-[15px] font-medium outline-none w-full md:w-auto cursor-pointer border-b border-white/10 focus:border-primary pb-2 transition-all [color-scheme:dark]' 
                         required 
                     />

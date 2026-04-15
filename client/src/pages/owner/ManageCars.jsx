@@ -11,6 +11,18 @@ const ManageCars = () => {
   const [cars, setCars] = useState([])
   const [editingCar, setEditingCar] = useState(null)
 
+  const calculateAge = (dateString) => {
+    if (!dateString) return 0;
+    const issueDate = new Date(dateString);
+    const today = new Date();
+    let age = today.getFullYear() - issueDate.getFullYear();
+    const m = today.getMonth() - issueDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < issueDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : 0;
+  }
+
   const fetchOwnerCars = async ()=>{
     try {
       const {data} = await axios.get('/api/owner/cars')
@@ -63,7 +75,14 @@ const ManageCars = () => {
 
   const saveEdit = async () => {
     try {
-      const { data } = await axios.post('/api/owner/update-car', { ...editingCar, carId: editingCar._id })
+        ...editingCar,
+        carId: editingCar._id,
+        year: calculateAge(editingCar.rtoDate),
+        threeSixtyImages: typeof editingCar.threeSixtyImages === 'string' 
+          ? editingCar.threeSixtyImages.split('\n').filter(url => url.trim() !== '') 
+          : editingCar.threeSixtyImages
+      }
+      const { data } = await axios.post('/api/owner/update-car', dataToSubmit)
       if (data.success) {
         toast.success(data.message)
         setEditingCar(null)
@@ -186,6 +205,90 @@ const ManageCars = () => {
             </div>
             
             <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              
+              {/* Brand & Model */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Brand</label>
+                  <input 
+                    type="text" 
+                    name="brand" 
+                    value={editingCar.brand} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Model</label>
+                  <input 
+                    type="text" 
+                    name="model" 
+                    value={editingCar.model} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* RTO Date & Age */}
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">RTO Issue Date (Calculates Age)</label>
+                  <input 
+                    type="date" 
+                    name="rtoDate" 
+                    value={editingCar.rtoDate ? new Date(editingCar.rtoDate).toISOString().split('T')[0] : ''} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors [color-scheme:dark]"
+                  />
+                  {editingCar.rtoDate && (
+                    <p className="text-[10px] text-primary mt-1.5 font-semibold uppercase tracking-wider">
+                      Current Age: <span className="text-white">{calculateAge(editingCar.rtoDate)} Years</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Description</label>
+                <textarea 
+                  name="description" 
+                  rows={4}
+                  value={editingCar.description} 
+                  onChange={handleEditChange}
+                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors resize-none"
+                />
+              </div>
+
+              {/* Location & Fuel Type */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Location</label>
+                  <input 
+                    type="text" 
+                    name="location" 
+                    value={editingCar.location} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Fuel Type</label>
+                  <select 
+                    name="fuel_type" 
+                    value={editingCar.fuel_type} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  >
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                    <option value="Electric">Electric</option>
+                    <option value="Hybrid">Hybrid</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Daily Rate ({currency})</label>
@@ -262,18 +365,39 @@ const ManageCars = () => {
                </div>
 
                <div>
-                 <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Premium Features</label>
+                 <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Features & Amenities</label>
+                 
+                 {/* Suggested Features / Quick Add */}
+                 <div className='flex flex-wrap gap-1.5 mb-3'>
+                    {["GPS", "Bluetooth", "Sunroof", "360 Camera", "Heated Seats", "Air Conditioning", "USB Port", "Cruise Control"].map(feat => (
+                      <button 
+                        key={feat}
+                        type="button" 
+                        onClick={() => {
+                          if (!editingCar.features?.includes(feat)) {
+                             setEditingCar({...editingCar, features: [...(editingCar.features || []), feat]});
+                          }
+                        }}
+                        className={`text-[9px] font-black uppercase tracking-tighter px-2.5 py-1 rounded-full border transition-all ${editingCar.features?.includes(feat) ? 'bg-primary/20 border-primary text-primary opacity-50 cursor-default' : 'bg-white/5 border-white/10 text-gray-500 hover:border-primary/50 hover:text-white'}`}
+                      >
+                        + {feat}
+                      </button>
+                    ))}
+                 </div>
+
                  <div className='flex gap-2 items-center mb-4'>
                     <input 
                       type="text" 
                       id="edit-feature-input"
-                      placeholder="Type feature..." 
+                      placeholder="Add custom feature..." 
                       className='px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all w-full flex-1'
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
                           if (e.target.value.trim()) {
-                            setEditingCar({...editingCar, features: [...(editingCar.features || []), e.target.value.trim()]});
+                            if (!editingCar.features?.includes(e.target.value.trim())) {
+                              setEditingCar({...editingCar, features: [...(editingCar.features || []), e.target.value.trim()]});
+                            }
                             e.target.value = '';
                           }
                         }
@@ -284,8 +408,10 @@ const ManageCars = () => {
                       onClick={() => {
                         const input = document.getElementById('edit-feature-input');
                         if (input.value.trim()) {
-                          setEditingCar({...editingCar, features: [...(editingCar.features || []), input.value.trim()]});
-                          input.value = '';
+                           if (!editingCar.features?.includes(input.value.trim())) {
+                            setEditingCar({...editingCar, features: [...(editingCar.features || []), input.value.trim()]});
+                           }
+                           input.value = '';
                         }
                       }}
                       className='px-6 py-3 bg-white/5 hover:bg-primary/20 text-white rounded-xl border border-white/10 hover:border-primary/50 transition-all font-bold text-sm h-full whitespace-nowrap outline-none'
@@ -302,8 +428,22 @@ const ManageCars = () => {
                          </button>
                       </div>
                     ))}
-                    {(!editingCar.features || editingCar.features.length === 0) && <span className='text-xs text-gray-600 font-medium italic'>No custom features exist for this vehicle.</span>}
+                    {(!editingCar.features || editingCar.features.length === 0) && <span className='text-xs text-gray-600 font-medium italic'>No features exist for this vehicle.</span>}
                  </div>
+               </div>
+
+               {/* 360 View Management */}
+               <div className="p-4 border border-primary/20 bg-primary/5 rounded-xl">
+                 <label className="block text-xs uppercase tracking-[0.2em] text-primary font-black mb-3 italic">360° Vision Data (Interactive View)</label>
+                 <p className="text-[10px] text-gray-500 mb-3 leading-relaxed uppercase tracking-wider">Paste each image URL for the 360° rotation on a <span className="text-white">new line</span>. Recommended: 24 to 36 frames.</p>
+                 <textarea 
+                   name="threeSixtyImages" 
+                   rows={6}
+                   placeholder="https://example.com/car_frame_1.jpg&#10;https://example.com/car_frame_2.jpg"
+                   value={Array.isArray(editingCar.threeSixtyImages) ? editingCar.threeSixtyImages.join('\n') : editingCar.threeSixtyImages} 
+                   onChange={handleEditChange}
+                   className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors resize-none text-[11px] font-mono custom-scrollbar"
+                 />
                </div>
             </div>
 
