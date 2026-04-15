@@ -16,7 +16,7 @@ export const AppProvider = ({ children })=>{
     const navigate = useNavigate()
     const currency = import.meta.env.VITE_CURRENCY
 
-    const [token, setToken] = useState(sessionStorage.getItem('token') || null)
+    const [token, setToken] = useState(() => sessionStorage.getItem('token') || null)
     const [user, setUser] = useState(null)
     const [isAdmin, setIsAdmin] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
@@ -36,6 +36,10 @@ export const AppProvider = ({ children })=>{
             setUser(data.user)
             setIsAdmin(data.user.role === 'admin')
            }else{
+            setToken(null)
+            sessionStorage.removeItem('token')
+            axios.defaults.headers.common['Authorization'] = ''
+            toast.error("Session expired or invalid.")
             navigate('/')
            }
         } catch (error) {
