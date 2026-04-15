@@ -1,5 +1,5 @@
 import React from 'react'
-import { assets, ownerMenuLinks } from '../../assets/assets'
+import { ownerMenuLinks } from '../../assets/assets'
 import { NavLink, useLocation, Link } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 
