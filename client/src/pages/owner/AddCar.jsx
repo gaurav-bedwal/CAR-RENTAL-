@@ -20,7 +20,21 @@ const AddCar = () => {
     seating_capacity: 0,
     location: '',
     description: '',
+    features: [],
+    rtoDate: ''
   })
+
+  const calculateAge = (dateString) => {
+    if (!dateString) return 0;
+    const issueDate = new Date(dateString);
+    const today = new Date();
+    let age = today.getFullYear() - issueDate.getFullYear();
+    const m = today.getMonth() - issueDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < issueDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : 0;
+  }
 
   const [isLoading, setIsLoading] = useState(false)
   const onSubmitHandler = async (e)=>{
@@ -35,7 +49,12 @@ const AddCar = () => {
     try {
       const formData = new FormData()
       formData.append('image', image)
-      formData.append('carData', JSON.stringify(car))
+      const carDataToSubmit = {
+        ...car,
+        year: calculateAge(car.rtoDate) // Save calculated age to backend year schema metric
+      }
+
+      formData.append('carData', JSON.stringify(carDataToSubmit))
 
       const {data} = await axios.post('/api/owner/add-car', formData)
 
@@ -53,6 +72,8 @@ const AddCar = () => {
           seating_capacity: 0,
           location: '',
           description: '',
+          features: [],
+          rtoDate: ''
         })
       }else{
         toast.error(data.message)
@@ -104,8 +125,9 @@ const AddCar = () => {
         {/* Car Year, Price, Category */}
         <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8'>
           <div className='flex flex-col w-full'>
-            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Year</label>
-            <input type="number" placeholder="2025" required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.year} onChange={e=> setCar({...car, year: e.target.value})}/>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>RTO Issue Date (Age)</label>
+            <input type="date" required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all appearance-none' value={car.rtoDate} onChange={e=> setCar({...car, rtoDate: e.target.value})}/>
+            {car.rtoDate && <span className="text-[10px] text-primary mt-1.5 font-semibold">Calculated Age: <span className="text-white">{calculateAge(car.rtoDate)} years</span></span>}
           </div>
           <div className='flex flex-col w-full'>
             <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Daily Rate ({currency})</label>
@@ -166,6 +188,54 @@ const AddCar = () => {
             <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Detailed Description</label>
             <textarea rows={5} placeholder="Briefly describe the vehicle's unique features, condition, and optional extras..." required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all resize-none' value={car.description} onChange={e=> setCar({...car, description: e.target.value})}></textarea>
           </div>
+
+        {/* Custom Admin Features */}
+        {isAdmin && (
+          <div className='flex flex-col w-full col-span-full'>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Premium Features</label>
+            <div className='flex gap-2 items-center mb-4'>
+               <input 
+                 type="text" 
+                 id="feature-input"
+                 placeholder="e.g. Panoramic Sunroof, GPS..." 
+                 className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all w-full flex-1'
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter') {
+                     e.preventDefault();
+                     if (e.target.value.trim()) {
+                       setCar({...car, features: [...(car.features || []), e.target.value.trim()]});
+                       e.target.value = '';
+                     }
+                   }
+                 }}
+               />
+               <button 
+                 type="button" 
+                 onClick={() => {
+                   const input = document.getElementById('feature-input');
+                   if (input.value.trim()) {
+                     setCar({...car, features: [...(car.features || []), input.value.trim()]});
+                     input.value = '';
+                   }
+                 }}
+                 className='px-6 py-3 bg-white/5 hover:bg-primary/20 text-white rounded-xl border border-white/10 hover:border-primary/50 transition-all font-bold text-sm h-full whitespace-nowrap outline-none'
+               >
+                 Add
+               </button>
+            </div>
+            <div className='flex flex-wrap gap-2 min-h-8'>
+               {car.features?.map((feat, idx) => (
+                 <div key={idx} className='flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg group'>
+                    <span className='text-xs font-semibold text-primary'>{feat}</span>
+                    <button type="button" onClick={() => setCar({...car, features: car.features.filter((_, i) => i !== idx)})} className='text-primary/50 hover:text-red-400 outline-none'>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                    </button>
+                 </div>
+               ))}
+               {(!car.features || car.features.length === 0) && <span className='text-xs text-gray-600 font-medium italic'>No custom features added. Type and press Add/Enter.</span>}
+            </div>
+          </div>
+        )}
 
         <button className='w-full md:w-max px-10 py-5 bg-primary text-[#0a0a0a] rounded-2xl font-black uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:bg-primary-dull transition-all cursor-pointer flex items-center justify-center gap-4 text-xs'>
           {isLoading ? 'Processing Fleet Data...' : (
