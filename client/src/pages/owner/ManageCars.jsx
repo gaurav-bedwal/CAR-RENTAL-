@@ -185,7 +185,7 @@ const ManageCars = () => {
               </button>
             </div>
             
-            <div className="p-6 space-y-5">
+            <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <div>
                 <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Price Per Day ({currency})</label>
                 <input 
@@ -246,6 +246,51 @@ const ManageCars = () => {
                       <option value="Automatic">Automatic</option>
                       <option value="Manual">Manual</option>
                     </select>
+                 </div>
+               </div>
+
+               <div>
+                 <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Premium Features</label>
+                 <div className='flex gap-2 items-center mb-4'>
+                    <input 
+                      type="text" 
+                      id="edit-feature-input"
+                      placeholder="Type feature..." 
+                      className='px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all w-full flex-1'
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (e.target.value.trim()) {
+                            setEditingCar({...editingCar, features: [...(editingCar.features || []), e.target.value.trim()]});
+                            e.target.value = '';
+                          }
+                        }
+                      }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        const input = document.getElementById('edit-feature-input');
+                        if (input.value.trim()) {
+                          setEditingCar({...editingCar, features: [...(editingCar.features || []), input.value.trim()]});
+                          input.value = '';
+                        }
+                      }}
+                      className='px-6 py-3 bg-white/5 hover:bg-primary/20 text-white rounded-xl border border-white/10 hover:border-primary/50 transition-all font-bold text-sm h-full whitespace-nowrap outline-none'
+                    >
+                      Add
+                    </button>
+                 </div>
+                 <div className='flex flex-wrap gap-2'>
+                    {editingCar.features?.map((feat, idx) => (
+                      <div key={idx} className='flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg group'>
+                         <span className='text-xs font-semibold text-primary'>{feat}</span>
+                         <button type="button" onClick={() => setEditingCar({...editingCar, features: editingCar.features.filter((_, i) => i !== idx)})} className='text-primary/50 hover:text-red-400 outline-none'>
+                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" /></svg>
+                         </button>
+                      </div>
+                    ))}
+                    {(!editingCar.features || editingCar.features.length === 0) && <span className='text-xs text-gray-600 font-medium italic'>No custom features exist for this vehicle.</span>}
                  </div>
                </div>
             </div>
