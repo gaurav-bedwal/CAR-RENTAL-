@@ -149,7 +149,7 @@ const Chatbot = () => {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 10 }}
-                        className="absolute right-20 bottom-3 bg-black/80 backdrop-blur-md px-4 py-2 rounded-xl border border-[#D4AF37]/30 shadow-2xl hidden md:block w-32"
+                        className="absolute right-20 bottom-3 bg-black/80 backdrop-blur-md px-4 py-2 rounded-xl border border-[#D4AF37]/30 shadow-2xl hidden md:flex items-center justify-center w-max"
                     >
                         <p className="text-[10px] font-black text-[#D4AF37] uppercase tracking-[0.2em] whitespace-nowrap">Chat with Luxie</p>
                     </motion.div>
