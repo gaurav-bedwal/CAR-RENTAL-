@@ -10,6 +10,13 @@ const ManageCars = () => {
 
   const [cars, setCars] = useState([])
   const [editingCar, setEditingCar] = useState(null)
+  const [filter, setFilter] = useState('all')
+
+  const tabs = [
+    { id: 'all', label: 'All Cars' },
+    { id: 'approved', label: 'Approved Listing' },
+    { id: 'pending', label: 'Pending Approval' },
+  ]
 
   const calculateAge = (dateString) => {
     if (!dateString) return 0;
@@ -105,7 +112,24 @@ const ManageCars = () => {
       
       <Title title="Manage Cars" subTitle="View all listed cars, update their details, or remove them from the booking platform."/>
 
-      <div className='max-w-4xl w-full rounded-3xl overflow-x-auto bg-[#141824] border border-white/5 shadow-2xl mt-8 mb-20'>
+      {/* Filter Tabs */}
+      <div className="flex gap-2 overflow-x-auto no-scrollbar mt-6 mb-2 pb-2">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setFilter(tab.id)}
+            className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+              filter === tab.id 
+              ? 'bg-primary text-[#0a0a0a] shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
+              : 'bg-[#141824] text-gray-400 border border-white/5 hover:border-primary/50 hover:text-white'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className='max-w-4xl w-full rounded-3xl overflow-x-auto bg-[#141824] border border-white/5 shadow-2xl mt-4 mb-20'>
 
         <table className='w-full border-collapse text-left text-sm text-gray-400 min-w-[700px]'>
           <thead className='text-gray-500 uppercase tracking-widest text-xs bg-[#1a1a1a]'>
@@ -118,7 +142,7 @@ const ManageCars = () => {
             </tr>
           </thead>
           <tbody>
-            {cars.map((car, index)=>(
+            {(filter === 'all' ? cars : cars.filter(c => c.status === filter)).map((car, index)=>(
               <tr key={index} className='border-t border-white/5 hover:bg-white/[0.02] transition-colors'>
 
                 <td className='p-4 pl-6 flex items-center gap-4'>
@@ -170,7 +194,14 @@ const ManageCars = () => {
           </tbody>
         </table>
 
-        {cars.length === 0 && <div className='p-8 text-center text-gray-500 italic'>No cars listed yet.</div>}
+        {(filter === 'all' ? cars : cars.filter(c => c.status === filter)).length === 0 && (
+          <div className='p-12 text-center text-gray-500 flex flex-col items-center justify-center gap-3'>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 opacity-30">
+               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+            </svg>
+            <p className="text-xs uppercase tracking-widest font-medium">No {filter !== 'all' ? filter : ''} cars found.</p>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
