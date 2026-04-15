@@ -178,9 +178,6 @@ const AddCar = () => {
 
       </form>
 
-
-      </form>
-
     </div>
   )
 }

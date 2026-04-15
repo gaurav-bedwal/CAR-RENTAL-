@@ -81,7 +81,6 @@ const ManageCars = () => {
   },[isAdmin])
 
   return (
-  return (
     <div className='w-full relative'>
       
       <Title title="Manage Cars" subTitle="View all listed cars, update their details, or remove them from the booking platform."/>

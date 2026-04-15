@@ -15,7 +15,9 @@ const Layout = () => {
     }
   }, [token])
 
-  return token && (
+  if (!token) return null;
+
+  return (
     <div className='flex flex-col min-h-screen bg-[#06070a] text-gray-300 font-sans selection:bg-primary/30 selection:text-white'>
       {/* Dynamic Background Glows */}
       <div className='fixed inset-0 pointer-events-none overflow-hidden z-0'>
