@@ -39,7 +39,7 @@ const ManageBookings = () => {
   },[])
 
   return (
-    <div className='px-4 pt-10 md:px-10 w-full min-h-screen bg-[#0B0D17]'>
+    <div className='w-full'>
       
       <Title title="Manage Bookings" subTitle="Track all customer bookings, approve or cancel requests, and manage booking statuses."/>
 

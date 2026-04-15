@@ -69,44 +69,52 @@ const AddCar = () => {
 
       <Title title={isAdmin ? "Add New Car to Fleet" : "Request Car Listing"} subTitle={isAdmin ? "Add a new vehicle directly to the platform's active fleet." : "Submit your car details to an administrator for review and approval."}/>
 
-      <form onSubmit={onSubmitHandler} className='flex flex-col gap-5 text-gray-500 text-sm mt-6 max-w-xl'>
+      <form onSubmit={onSubmitHandler} className='flex flex-col gap-8 text-gray-400 text-sm mt-10 max-w-2xl'>
 
-        {/* Car Image */}
-        <div className='flex items-center gap-2 w-full'>
-          <label htmlFor="car-image">
-            <img src={image ? URL.createObjectURL(image) : assets.upload_icon} alt="" className='h-14 rounded cursor-pointer'/>
+        {/* Car Image Profile */}
+        <div className='flex items-center gap-6 p-6 rounded-3xl bg-[#141824]/40 border border-white/5 backdrop-blur-sm'>
+          <label htmlFor="car-image" className='relative group cursor-pointer'>
+            <div className='w-24 h-24 rounded-2xl overflow-hidden border-2 border-dashed border-white/20 group-hover:border-primary/50 transition-all flex items-center justify-center bg-[#0B0D17]'>
+              {image ? (
+                <img src={URL.createObjectURL(image)} alt="" className='w-full h-full object-cover' />
+              ) : (
+                <img src={assets.upload_icon} alt="" className='w-8 h-8 opacity-40 group-hover:opacity-100 transition-opacity' />
+              )}
+            </div>
             <input type="file" id="car-image" accept="image/*" hidden onChange={e=> setImage(e.target.files[0])}/>
           </label>
-          <p className='text-sm text-gray-500'>Upload car image</p>
+          <div>
+             <p className='text-white font-bold text-lg tracking-tight'>Vehicle Visual</p>
+             <p className='text-xs text-gray-500 mt-1 max-w-xs'>Upload a high-quality image of the car for better platform conversion.</p>
+          </div>
         </div>
 
         {/* Car Brand & Model */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
           <div className='flex flex-col w-full'>
-            <label>Brand</label>
-            <input type="text" placeholder="e.g. BMW, Mercedes, Audi..." required className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none' value={car.brand} onChange={e=> setCar({...car, brand: e.target.value})}/>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Brand</label>
+            <input type="text" placeholder="e.g. BMW, Mercedes..." required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.brand} onChange={e=> setCar({...car, brand: e.target.value})}/>
           </div>
           <div className='flex flex-col w-full'>
-            <label>Model</label>
-            <input type="text" placeholder="e.g. X5, E-Class, M4..." required className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none' value={car.model} onChange={e=> setCar({...car, model: e.target.value})}/>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Model</label>
+            <input type="text" placeholder="e.g. X5, E-Class..." required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.model} onChange={e=> setCar({...car, model: e.target.value})}/>
           </div>
-          
         </div>
 
         {/* Car Year, Price, Category */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8'>
           <div className='flex flex-col w-full'>
-            <label>Year</label>
-            <input type="number" placeholder="2025" required className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none' value={car.year} onChange={e=> setCar({...car, year: e.target.value})}/>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Year</label>
+            <input type="number" placeholder="2025" required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.year} onChange={e=> setCar({...car, year: e.target.value})}/>
           </div>
           <div className='flex flex-col w-full'>
-            <label>Daily Price ({currency})</label>
-            <input type="number" placeholder="100" required className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none' value={car.pricePerDay} onChange={e=> setCar({...car, pricePerDay: e.target.value})}/>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Daily Rate ({currency})</label>
+            <input type="number" placeholder="100" required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.pricePerDay} onChange={e=> setCar({...car, pricePerDay: e.target.value})}/>
           </div>
           <div className='flex flex-col w-full'>
-            <label>Category</label>
-            <select onChange={e=> setCar({...car, category: e.target.value})} value={car.category} className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none'>
-              <option value="">Select a category</option>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Category</label>
+            <select onChange={e=> setCar({...car, category: e.target.value})} value={car.category} className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all appearance-none cursor-pointer'>
+              <option value="">Select Category</option>
               <option value="Sedan">Sedan</option>
               <option value="SUV">SUV</option>
               <option value="Van">Van</option>
@@ -115,20 +123,20 @@ const AddCar = () => {
         </div>
 
          {/* Car Transmission, Fuel Type, Seating Capacity */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8'>
           <div className='flex flex-col w-full'>
-            <label>Transmission</label>
-            <select onChange={e=> setCar({...car, transmission: e.target.value})} value={car.transmission} className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none'>
-              <option value="">Select a transmission</option>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Transmission</label>
+            <select onChange={e=> setCar({...car, transmission: e.target.value})} value={car.transmission} className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all appearance-none cursor-pointer'>
+              <option value="">Select Type</option>
               <option value="Automatic">Automatic</option>
               <option value="Manual">Manual</option>
               <option value="Semi-Automatic">Semi-Automatic</option>
             </select>
           </div>
           <div className='flex flex-col w-full'>
-            <label>Fuel Type</label>
-            <select onChange={e=> setCar({...car, fuel_type: e.target.value})} value={car.fuel_type} className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none'>
-              <option value="">Select a fuel type</option>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Fuel Type</label>
+            <select onChange={e=> setCar({...car, fuel_type: e.target.value})} value={car.fuel_type} className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all appearance-none cursor-pointer'>
+              <option value="">Select Fuel</option>
               <option value="Gas">Gas</option>
               <option value="Diesel">Diesel</option>
               <option value="Petrol">Petrol</option>
@@ -137,16 +145,16 @@ const AddCar = () => {
             </select>
           </div>
           <div className='flex flex-col w-full'>
-            <label>Seating Capacity</label>
-            <input type="number" placeholder="4" required className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none' value={car.seating_capacity} onChange={e=> setCar({...car, seating_capacity: e.target.value})}/>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Capacity</label>
+            <input type="number" placeholder="4" required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all' value={car.seating_capacity} onChange={e=> setCar({...car, seating_capacity: e.target.value})}/>
           </div>
         </div>
 
          {/* Car Location */}
          <div className='flex flex-col w-full'>
-            <label>Location</label>
-            <select onChange={e=> setCar({...car, location: e.target.value})} value={car.location} className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none'>
-              <option value="">Select a location</option>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Deployment Location</label>
+            <select onChange={e=> setCar({...car, location: e.target.value})} value={car.location} className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all appearance-none cursor-pointer'>
+              <option value="">Select City</option>
               <option value="New York">New York</option>
               <option value="Los Angeles">Los Angeles</option>
               <option value="Houston">Houston</option>
@@ -155,14 +163,20 @@ const AddCar = () => {
          </div>
         {/* Car Description */}
          <div className='flex flex-col w-full'>
-            <label>Description</label>
-            <textarea rows={5} placeholder="e.g. A luxurious SUV with a spacious interior and a powerful engine." required className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none' value={car.description} onChange={e=> setCar({...car, description: e.target.value})}></textarea>
+            <label className='text-[10px] uppercase tracking-widest text-gray-500 font-black mb-2'>Detailed Description</label>
+            <textarea rows={5} placeholder="Briefly describe the vehicle's unique features, condition, and optional extras..." required className='px-4 py-3 bg-[#0B0D17] border border-white/10 rounded-xl outline-none focus:border-primary/50 text-white transition-all resize-none' value={car.description} onChange={e=> setCar({...car, description: e.target.value})}></textarea>
           </div>
 
-        <button className='flex items-center justify-center gap-2 px-6 py-3 mt-4 bg-primary text-[#0a0a0a] rounded-lg font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] hover:bg-primary-dull transition-all w-max cursor-pointer'>
-          {isAdmin ? <img src={assets.tick_icon} alt="" className="brightness-0" /> : null}
-          {isLoading ? 'Processing...' : isAdmin ? 'Add Car to Fleet' : 'Submit Request'}
+        <button className='w-full md:w-max px-10 py-5 bg-primary text-[#0a0a0a] rounded-2xl font-black uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:bg-primary-dull transition-all cursor-pointer flex items-center justify-center gap-4 text-xs'>
+          {isLoading ? 'Processing Fleet Data...' : (
+            <>
+              {isAdmin && <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>}
+              {isAdmin ? 'Deploy Vehicle' : 'Submit Listing Request'}
+            </>
+          )}
         </button>
+
+      </form>
 
 
       </form>

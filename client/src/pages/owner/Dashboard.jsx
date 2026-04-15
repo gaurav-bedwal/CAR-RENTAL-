@@ -60,18 +60,18 @@ const Dashboard = () => {
   }, [isAdmin])
 
   return (
-    <div className='px-6 md:px-12 py-10 flex-1 bg-[#0B0D17] min-h-screen'>
+    <div className='flex-1 py-10'>
       <Title title="Admin Dashboard" subTitle="Monitor overall platform performance including total cars, bookings, revenue, and recent activities" />
 
-      <div className='grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-10 w-full'>
+      <div className='grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 my-10 w-full'>
         {dashboardCards.map((card, index) => (
-          <div key={index} className='flex gap-4 items-center justify-between p-6 rounded-2xl border border-white/5 bg-[#141824] hover:border-primary/40 hover:shadow-primary/5 transition-all duration-300 shadow-xl'>
+          <div key={index} className='flex gap-4 items-center justify-between p-8 rounded-[2rem] border border-white/10 bg-[#141824]/40 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 shadow-2xl group'>
             <div>
-              <h1 className='text-xs uppercase tracking-widest text-gray-500 mb-1'>{card.title}</h1>
-              <p className='text-3xl font-bold tracking-tight text-white'>{card.value}</p>
+              <h1 className='text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-2 group-hover:text-primary transition-colors'>{card.title}</h1>
+              <p className='text-4xl font-extrabold tracking-tighter text-white leading-none'>{card.value}</p>
             </div>
-            <div className='flex items-center justify-center w-14 h-14 rounded-xl bg-[#0B0D17] border border-white/5 shadow-inner'>
-              <img src={card.icon} alt="" className='h-6 w-6 opacity-90' />
+            <div className='flex items-center justify-center w-16 h-16 rounded-2xl bg-[#0B0D17] border border-white/5 shadow-inner group-hover:scale-110 transition-transform'>
+              <img src={card.icon} alt="" className='h-7 w-7 opacity-90' />
             </div>
           </div>
         ))}
