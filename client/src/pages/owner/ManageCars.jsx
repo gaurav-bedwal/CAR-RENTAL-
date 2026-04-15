@@ -75,6 +75,7 @@ const ManageCars = () => {
 
   const saveEdit = async () => {
     try {
+      const dataToSubmit = {
         ...editingCar,
         carId: editingCar._id,
         year: calculateAge(editingCar.rtoDate),
