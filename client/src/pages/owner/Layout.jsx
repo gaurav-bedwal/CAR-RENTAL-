@@ -16,16 +16,13 @@ const Layout = () => {
   }, [token])
 
   return token && (
-    <div className='flex flex-col min-h-screen bg-gray-100 text-black font-sans'>
-      {/* Top Navbar */}
+    <div className='flex flex-col min-h-screen bg-[#0B0D17] text-gray-300'>
       <NavbarOwner />
-      
-      {/* Horizontal Tabs / Navigation */}
-      <Sidebar />
-
-      {/* Main Content Area */}
-      <div className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-        <Outlet />
+      <div className='flex flex-1 overflow-hidden'>
+        <Sidebar />
+        <div className="flex-1 overflow-y-auto">
+          <Outlet />
+        </div>
       </div>
     </div>
   )

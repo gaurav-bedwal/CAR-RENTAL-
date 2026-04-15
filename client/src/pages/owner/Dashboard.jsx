@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { assets } from '../../assets/assets'
+import { assets, dummyDashboardData } from '../../assets/assets'
 import Title from '../../components/owner/Title'
 import { useAppContext } from '../../context/AppContext'
 import toast from 'react-hot-toast'
@@ -17,12 +17,11 @@ const Dashboard = () => {
     monthlyRevenue: 0,
   })
 
-  // Large, high-contrast dashboard cards
   const dashboardCards = [
-    { title: "Total Fleet", value: data.totalCars, color: "bg-blue-100", textColor: "text-blue-800" },
-    { title: "Total Orders", value: data.totalBookings, color: "bg-purple-100", textColor: "text-purple-800" },
-    { title: "Needs Attention", value: data.pendingBookings, color: "bg-yellow-100", textColor: "text-yellow-800" },
-    { title: "Successful Rentals", value: data.completedBookings, color: "bg-green-100", textColor: "text-green-800" },
+    { title: "Total Cars", value: data.totalCars, icon: assets.carIconColored },
+    { title: "Total Bookings", value: data.totalBookings, icon: assets.listIconColored },
+    { title: "Pending", value: data.pendingBookings, icon: assets.cautionIconColored },
+    { title: "Confirmed", value: data.completedBookings, icon: assets.listIconColored },
   ]
 
   const fetchDashboardData = async () => {
@@ -45,60 +44,62 @@ const Dashboard = () => {
   }, [isAdmin])
 
   return (
-    <div className='w-full min-h-screen pb-20'>
-      <Title title="Platform Overview" subTitle="Quick look at your business numbers. Big boxes show your current progress." />
+    <div className='px-6 md:px-12 py-10 flex-1 bg-[#0B0D17] min-h-screen'>
+      <Title title="Admin Dashboard" subTitle="Monitor overall platform performance including total cars, bookings, revenue, and recent activities" />
 
-      {/* Massive Stat Boxes */}
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-10 w-full'>
+      <div className='grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-10 w-full'>
         {dashboardCards.map((card, index) => (
-          <div key={index} className={`p-10 rounded-3xl border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] ${card.color}`}>
-              <h2 className={`text-sm font-black uppercase tracking-widest ${card.textColor} mb-2`}>{card.title}</h2>
-              <p className='text-6xl font-black text-black tracking-tighter'>{card.value}</p>
+          <div key={index} className='flex gap-4 items-center justify-between p-6 rounded-2xl border border-white/5 bg-[#141824] hover:border-primary/40 hover:shadow-primary/5 transition-all duration-300 shadow-xl'>
+            <div>
+              <h1 className='text-xs uppercase tracking-widest text-gray-500 mb-1'>{card.title}</h1>
+              <p className='text-3xl font-bold tracking-tight text-white'>{card.value}</p>
+            </div>
+            <div className='flex items-center justify-center w-14 h-14 rounded-xl bg-[#0B0D17] border border-white/5 shadow-inner'>
+              <img src={card.icon} alt="" className='h-6 w-6 opacity-90' />
+            </div>
           </div>
         ))}
       </div>
 
 
-      <div className='flex flex-col lg:flex-row items-stretch gap-10 mt-12 w-full'>
-        
-        {/* Money Box - Extremely Prominent */}
-        <div className='p-10 bg-primary border-4 border-black rounded-3xl shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] flex-shrink-0 lg:w-96 flex flex-col justify-center text-center'>
-            <h2 className='text-2xl font-black uppercase text-black tracking-tighter mb-2'>Total Earnings</h2>
-            <p className='text-7xl font-black text-black tracking-tighter mb-4'>{currency}{data.monthlyRevenue}</p>
-            <div className='bg-black/10 py-2 rounded-xl font-bold uppercase text-xs tracking-widest'>Revenue this month</div>
-        </div>
+      <div className='flex flex-col lg:flex-row items-start gap-8 mb-8 w-full'>
+        {/* recent booking  */}
+        <div className='p-6 md:p-8 bg-[#141824] border border-white/5 rounded-3xl shadow-2xl w-full flex-grow'>
+          <h1 className='text-xl md:text-2xl font-bold text-white tracking-wide'>Recent Bookings</h1>
+          <p className='text-sm text-gray-400 mt-1 mb-6 font-light'>Latest customer bookings across the platform</p>
 
-        {/* Recent Activity Mini-Card List */}
-        <div className='p-8 bg-white border-4 border-black rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex-1'>
-          <h2 className='text-3xl font-black text-black uppercase tracking-tighter mb-6'>Latest History</h2>
-          
           <div className="space-y-4">
             {data.recentBookings.map((booking, index) => (
-              <div key={index} className='p-5 bg-gray-50 border-2 border-black rounded-2xl flex flex-wrap items-center justify-between gap-4'>
+              <div key={index} className='p-4 bg-[#0B0D17] border border-white/5 rounded-2xl flex items-center justify-between hover:border-primary/30 transition-all duration-300'>
 
-                <div className='flex items-center gap-5'>
-                  <div className='w-16 h-16 rounded-xl border-2 border-black overflow-hidden bg-white'>
-                      <img src={booking.car?.image || assets.car_logo} alt="" className='w-full h-full object-cover' />
+                <div className='flex items-center gap-4'>
+                  <div className='hidden md:flex items-center justify-center w-12 h-12 rounded-xl bg-[#141824] border border-white/5'>
+                    <img src={assets.listIconColored} alt="" className='h-5 w-5 opacity-90' />
                   </div>
                   <div>
-                    <p className="text-xl font-black text-black uppercase leading-none">{booking.car?.brand} {booking.car?.model}</p>
-                    <p className='text-sm font-bold text-gray-400 mt-1 uppercase tracking-widest'>{booking.user?.name}</p>
+                    <p className="text-white font-semibold tracking-wide">{booking.car?.brand || 'Deleted Car'} {booking.car?.model || ''}</p>
+                    <p className='text-xs uppercase tracking-widest text-gray-500 mt-1'>{booking.createdAt ? booking.createdAt.split('T')[0] : 'N/A'}</p>
                   </div>
                 </div>
 
-                <div className='flex items-center gap-6'>
-                  <p className='text-2xl font-black text-black'>{currency}{booking.price}</p>
-                  <div className={`px-4 py-1.5 rounded-full border-2 border-black text-[10px] font-black uppercase tracking-widest ${
-                    booking.status === 'confirmed' ? 'bg-green-400' : 
-                    booking.status === 'completed' ? 'bg-blue-400' : 'bg-red-400'
-                  }`}>
-                    {booking.status}
-                  </div>
+                <div className='flex items-center gap-4 font-medium'>
+                  <p className='text-base text-primary font-bold tracking-tight'>{currency}{booking.price}</p>
+                  <p className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${booking.status === 'confirmed' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>{booking.status}</p>
                 </div>
               </div>
             ))}
           </div>
-          {data.recentBookings.length === 0 && <p className="text-gray-500 font-bold uppercase italic mt-4">History is empty.</p>}
+          {data.recentBookings.length === 0 && <p className="text-gray-500 text-sm italic">No recent bookings found.</p>}
+        </div>
+
+        {/* monthly revenue */}
+        <div className='p-6 md:p-8 bg-[#141824] border border-white/5 rounded-3xl shadow-2xl w-full lg:max-w-md relative overflow-hidden'>
+          {/* subtle glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[50px] rounded-full pointer-events-none"></div>
+
+          <h1 className='text-xl md:text-2xl font-bold text-white tracking-wide'>Monthly Revenue</h1>
+          <p className='text-sm text-gray-400 mt-1 mb-6 font-light'>Revenue generated this month</p>
+          <p className='text-5xl mt-6 font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-primary to-yellow-600 tracking-tighter'>{currency}{data.monthlyRevenue}</p>
         </div>
 
       </div>
