@@ -24,6 +24,19 @@ const Dashboard = () => {
     { title: "Confirmed", value: data.completedBookings, icon: assets.listIconColored },
   ]
 
+  const fetchDashboardData = async () => {
+    try {
+      const { data } = await axios.get('/api/owner/dashboard')
+      if (data.success) {
+        setData(data.dashboardData)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
   const changeBookingStatus = async (bookingId, status) => {
     try {
       const { data } = await axios.post('/api/bookings/change-status', { bookingId, status })
