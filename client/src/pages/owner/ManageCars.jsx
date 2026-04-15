@@ -1,53 +1,52 @@
 import React, { useEffect, useState } from 'react'
-import { assets} from '../../assets/assets'
+import { assets } from '../../assets/assets'
 import Title from '../../components/owner/Title'
 import { useAppContext } from '../../context/AppContext'
 import toast from 'react-hot-toast'
 
 const ManageCars = () => {
 
-  const {isAdmin, axios, currency} = useAppContext()
+  const { isAdmin, axios, currency } = useAppContext()
 
   const [cars, setCars] = useState([])
   const [editingCar, setEditingCar] = useState(null)
-
-  const fetchOwnerCars = async ()=>{
-    try {
-      const {data} = await axios.get('/api/owner/cars')
-      if(data.success){
-        setCars(data.cars)
-      }else{
-        toast.error(data.message)
-      }
-    } catch (error) {
-      toast.error(error.message)
-    }
-  }
-
-  const toggleAvailability = async (carId)=>{
-    try {
-      const {data} = await axios.post('/api/owner/toggle-car', {carId})
-      if(data.success){
-        toast.success(data.message)
-        fetchOwnerCars()
-      }else{
-        toast.error(data.message)
-      }
-    } catch (error) {
-      toast.error(error.message)
-    }
-  }
-
   const [deletingCarId, setDeletingCarId] = useState(null)
 
-  const deleteCar = async ()=>{
-    if(!deletingCarId) return;
+  const fetchOwnerCars = async () => {
     try {
-      const {data} = await axios.post('/api/owner/delete-car', {carId: deletingCarId})
-      if(data.success){
+      const { data } = await axios.get('/api/owner/cars')
+      if (data.success) {
+        setCars(data.cars)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  const toggleAvailability = async (carId) => {
+    try {
+      const { data } = await axios.post('/api/owner/toggle-car', { carId })
+      if (data.success) {
         toast.success(data.message)
         fetchOwnerCars()
-      }else{
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  const deleteCar = async () => {
+    if (!deletingCarId) return;
+    try {
+      const { data } = await axios.post('/api/owner/delete-car', { carId: deletingCarId })
+      if (data.success) {
+        toast.success(data.message)
+        fetchOwnerCars()
+      } else {
         toast.error(data.message)
       }
     } catch (error) {
@@ -76,97 +75,91 @@ const ManageCars = () => {
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     isAdmin && fetchOwnerCars()
-  },[isAdmin])
+  }, [isAdmin])
 
   return (
-    <div className='px-4 pt-10 md:px-10 w-full relative min-h-screen bg-[#0B0D17]'>
-      
-      <Title title="Manage Cars" subTitle="View all listed cars, update their details, or remove them from the booking platform."/>
+    <div className='w-full min-h-screen pb-20'>
 
-      <div className='max-w-4xl w-full rounded-3xl overflow-x-auto bg-[#141824] border border-white/5 shadow-2xl mt-8 mb-20'>
+      <Title title="Manage Fleet" subTitle="View every car in the platform. You can change their details, hide them from users, or permanently remove them." />
 
-        <table className='w-full border-collapse text-left text-sm text-gray-400 min-w-[700px]'>
-          <thead className='text-gray-500 uppercase tracking-widest text-xs bg-[#1a1a1a]'>
-            <tr>
-              <th className="p-4 font-medium pl-6">Car</th>
-              <th className="p-4 font-medium max-md:hidden">Category</th>
-              <th className="p-4 font-medium">Price</th>
-              <th className="p-4 font-medium max-md:hidden">Status</th>
-              <th className="p-4 font-medium text-right pr-6">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cars.map((car, index)=>(
-              <tr key={index} className='border-t border-white/5 hover:bg-white/[0.02] transition-colors'>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10'>
+        {cars.map((car, index) => (
+          <div key={index} className='bg-white border-4 border-black p-5 rounded-3xl shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px] transition-all flex flex-col'>
+            
+            {/* Polaroid Image */}
+            <div className='aspect-square rounded-2xl overflow-hidden border-2 border-black mb-6'>
+                <img src={car?.image} alt="" className="w-full h-full object-cover" />
+            </div>
 
-                <td className='p-4 pl-6 flex items-center gap-4'>
-                  <img src={car?.image} alt="" className="h-14 w-14 aspect-square rounded-xl object-cover border border-white/10 shadow-md"/>
-                  <div className='max-md:hidden'>
-                    <p className='font-bold text-white tracking-wide'>{car?.brand} {car?.model}</p>
-                    <p className='text-xs text-gray-500 mt-1 uppercase tracking-wider'>{car?.seating_capacity} Seater • {car?.transmission}</p>
+            <div className='flex-1'>
+               <div className='flex justify-between items-start mb-4'>
+                  <div>
+                     <h3 className='text-2xl font-black uppercase text-black leading-tight'>{car?.brand} {car?.model}</h3>
+                     <p className='text-gray-500 font-bold uppercase tracking-widest text-xs'>{car?.category} • {car?.transmission}</p>
                   </div>
-                </td>
-
-                <td className='p-4 max-md:hidden capitalize font-light'>{car.category}</td>
-                <td className='p-4'>
-                  <span className='text-lg text-primary font-bold tracking-tight'>{currency}{car.pricePerDay}</span>
-                  <span className='text-xs text-gray-500'>/day</span>
-                </td>
-
-                <td className='p-4 max-md:hidden'>
-                  <div className='flex flex-col gap-1 items-start'>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${car.status === 'approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20'}`}>
-                      {car.status === 'approved' ? "Approved" : "Pending" }
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${car.isAvaliable ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                      {car.isAvaliable ? "Available" : "Hidden" }
-                    </span>
+                  <div className='text-right'>
+                     <p className='text-2xl font-black text-primary'>{currency}{car.pricePerDay}</p>
+                     <p className='text-[10px] font-black uppercase text-gray-400'>per day</p>
                   </div>
-                </td>
+               </div>
 
-                <td className='p-4 align-middle text-right pr-6'>
-                  <div className='flex items-center justify-end gap-3'>
-                    <button onClick={()=> setEditingCar(car)} className='p-2 rounded-lg bg-white/5 hover:bg-primary/20 hover:text-primary transition-colors text-gray-400' title="Edit Pricing & Options">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                      </svg>
-                    </button>
-                    <button onClick={()=> toggleAvailability(car._id)} className='p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors opacity-80 hover:opacity-100' title={car.isAvaliable ? "Hide Car" : "Show Car"}>
-                      <img src={car.isAvaliable ? assets.eye_close_icon : assets.eye_icon} alt="" className='w-5 h-5 filter invert'/>
-                    </button>
-                    <button onClick={()=> setDeletingCarId(car._id)} className='px-3 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-100 border border-red-500/20 transition-all flex items-center gap-2 group' title="Remove Car Permanently">
-                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                      </svg>
-                      <span className='text-[10px] font-black uppercase tracking-tighter'>Remove</span>
-                    </button>
-                  </div>
-                </td>
+               <div className='flex gap-2 mb-6'>
+                  <span className={`px-3 py-1 rounded-lg border-2 border-black text-[10px] font-black uppercase tracking-widest ${car.status === 'approved' ? 'bg-green-400' : 'bg-yellow-400'}`}>
+                    {car.status}
+                  </span>
+                  <span className={`px-3 py-1 rounded-lg border-2 border-black text-[10px] font-black uppercase tracking-widest ${car.isAvaliable ? 'bg-blue-400' : 'bg-gray-400 opacity-50'}`}>
+                    {car.isAvaliable ? "Live" : "Hidden" }
+                  </span>
+               </div>
+            </div>
 
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            {/* Huge Action Buttons */}
+            <div className='grid grid-cols-1 gap-3 mt-auto border-t-2 border-dashed border-gray-100 pt-6'>
+               <div className='grid grid-cols-2 gap-3'>
+                  <button onClick={() => setEditingCar(car)} className='py-3 bg-gray-100 border-2 border-black rounded-xl font-black uppercase text-xs tracking-widest hover:bg-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px]'>
+                    Edit Details
+                  </button>
+                  <button onClick={() => toggleAvailability(car._id)} className={`py-3 border-2 border-black rounded-xl font-black uppercase text-xs tracking-widest transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] ${car.isAvaliable ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
+                    {car.isAvaliable ? "Hide Car" : "Show Car"}
+                  </button>
+               </div>
+               <button 
+                  onClick={() => setDeletingCarId(car._id)} 
+                  className='py-5 bg-red-600 text-white border-2 border-black rounded-xl font-black uppercase text-lg tracking-tighter shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all flex items-center justify-center gap-3'
+               >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                  REMOVE THIS CAR
+               </button>
+            </div>
 
-        {cars.length === 0 && <div className='p-8 text-center text-gray-500 italic'>No cars listed yet.</div>}
+          </div>
+        ))}
+
+        {cars.length === 0 && (
+           <div className='col-span-full py-20 text-center border-4 border-dashed border-gray-300 rounded-3xl'>
+             <p className='text-2xl font-bold text-gray-400 uppercase tracking-widest'>Fleet is empty.</p>
+           </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}
       {deletingCarId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#111] border border-red-500/20 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden relative p-8 text-center">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-500/10 mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-red-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white border-4 border-black rounded-3xl shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-sm overflow-hidden relative p-10 text-center">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-red-100 border-4 border-black mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-10 h-10 text-red-600">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Delete Car?</h3>
-            <p className="text-gray-400 text-sm mb-8">This action cannot be undone. This will permanently remove the car and delete any bookings associated with it.</p>
-            <div className="flex gap-3 justify-center">
-              <button onClick={() => setDeletingCarId(null)} className="px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors font-medium w-full">Cancel</button>
-              <button onClick={deleteCar} className="px-5 py-2.5 rounded-xl bg-red-500/80 text-white font-bold hover:bg-red-500 transition-colors w-full shadow-lg shadow-red-500/20">Delete</button>
+            <h3 className="text-3xl font-black text-black uppercase mb-4 tracking-tighter">Are you sure?</h3>
+            <p className="text-gray-600 font-bold mb-8">This car will be deleted and all its history will be lost forever!</p>
+            <div className="flex gap-4">
+              <button onClick={() => setDeletingCarId(null)} className="flex-1 py-4 rounded-xl border-4 border-black font-black uppercase tracking-widest bg-gray-100 hover:bg-white text-black transition-all">No, Keep it</button>
+              <button onClick={deleteCar} className="flex-1 py-4 rounded-xl border-4 border-black font-black uppercase tracking-widest bg-red-600 text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all">Yes, Delete</button>
             </div>
           </div>
         </div>
@@ -174,36 +167,36 @@ const ManageCars = () => {
 
       {/* Edit Modal */}
       {editingCar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#111] border border-white/10 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative">
-            <div className="p-6 border-b border-white/5 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white tracking-wide">Edit Car Options</h2>
-              <button onClick={() => setEditingCar(null)} className="text-gray-400 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white border-4 border-black rounded-3xl shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-md overflow-hidden relative">
+            <div className="p-8 border-b-4 border-black flex justify-between items-center bg-gray-50">
+              <h2 className="text-2xl font-black text-black uppercase tracking-tighter">Edit Vehicle</h2>
+              <button onClick={() => setEditingCar(null)} className="text-black hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-8 h-8">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
             
-            <div className="p-6 space-y-5">
+            <div className="p-8 space-y-6">
               <div>
-                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Price Per Day ({currency})</label>
+                <label className="block text-sm font-black uppercase text-gray-500 mb-2 tracking-widest">Price Per Day ({currency})</label>
                 <input 
                   type="number" 
                   name="pricePerDay" 
                   value={editingCar.pricePerDay} 
                   onChange={handleEditChange}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  className="w-full bg-gray-50 border-4 border-black rounded-2xl px-5 py-4 text-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Category</label>
+                <label className="block text-sm font-black uppercase text-gray-500 mb-2 tracking-widest">Category</label>
                 <select 
                   name="category" 
                   value={editingCar.category} 
                   onChange={handleEditChange}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  className="w-full bg-gray-50 border-4 border-black rounded-2xl px-5 py-4 text-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all appearance-none"
                 >
                   <option value="Sedan">Sedan</option>
                   <option value="SUV">SUV</option>
@@ -212,12 +205,12 @@ const ManageCars = () => {
               </div>
 
                <div>
-                <label className="block text-xs uppercase tracking-widest text-primary mb-2">Listing Status (Approval)</label>
+                <label className="block text-sm font-black uppercase text-gray-500 mb-2 tracking-widest">Status</label>
                 <select 
                   name="status" 
                   value={editingCar.status || 'pending'} 
                   onChange={handleEditChange}
-                  className="w-full bg-primary/10 border border-primary/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  className="w-full bg-gray-50 border-4 border-black rounded-2xl px-5 py-4 text-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all appearance-none"
                 >
                   <option value="pending">Pending</option>
                   <option value="approved">Approved</option>
@@ -226,22 +219,22 @@ const ManageCars = () => {
 
                <div className="grid grid-cols-2 gap-4">
                  <div>
-                    <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Seating</label>
+                    <label className="block text-sm font-black uppercase text-gray-500 mb-2 tracking-widest">Seating</label>
                     <input 
                       type="number" 
                       name="seating_capacity" 
                       value={editingCar.seating_capacity} 
                       onChange={handleEditChange}
-                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                      className="w-full bg-gray-50 border-4 border-black rounded-2xl px-5 py-4 text-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all"
                     />
                  </div>
                  <div>
-                    <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Transmission</label>
+                    <label className="block text-sm font-black uppercase text-gray-500 mb-2 tracking-widest">Gear</label>
                     <select 
                       name="transmission" 
                       value={editingCar.transmission} 
                       onChange={handleEditChange}
-                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                      className="w-full bg-gray-50 border-4 border-black rounded-2xl px-5 py-4 text-xl font-bold text-black focus:outline-none focus:ring-4 focus:ring-primary/20 transition-all appearance-none"
                     >
                       <option value="Automatic">Automatic</option>
                       <option value="Manual">Manual</option>
@@ -250,13 +243,9 @@ const ManageCars = () => {
                </div>
             </div>
 
-            <div className="p-6 border-t border-white/5 bg-[#0a0a0a]/50 flex justify-end gap-3">
-               <button onClick={() => setEditingCar(null)} className="px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition-colors font-medium">
-                 Cancel
-               </button>
-               <button onClick={saveEdit} className="px-5 py-2.5 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
-                 Save Changes
-               </button>
+            <div className="p-8 border-t-4 border-black bg-gray-50 flex gap-4">
+               <button onClick={() => setEditingCar(null)} className="flex-1 py-4 rounded-xl border-4 border-black font-black uppercase tracking-widest text-black hover:bg-white transition-all">Cancel</button>
+               <button onClick={saveEdit} className="flex-1 py-4 rounded-xl border-4 border-black font-black uppercase tracking-widest bg-primary text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all">Save Fleet</button>
             </div>
           </div>
         </div>
@@ -267,4 +256,3 @@ const ManageCars = () => {
 }
 
 export default ManageCars
-
