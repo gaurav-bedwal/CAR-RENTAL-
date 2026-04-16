@@ -25,7 +25,7 @@ const Navbar = () => {
         </Link>
 
         <div className={`max-sm:fixed max-sm:h-screen max-sm:w-full max-sm:top-[73px] max-sm:border-t border-borderColor right-0 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 max-sm:p-4 transition-all duration-300 z-50 bg-[#0a0a0ae6] backdrop-blur-md sm:bg-transparent ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}>
-            {menuLinks.filter(link => !(isAdmin && link.name === 'My Bookings')).map((link, index)=> (
+            {menuLinks.filter(link => !(isAdmin && (link.name === 'My Bookings' || link.name === 'Feedback'))).map((link, index)=> (
                 <Link key={index} to={link.path} onClick={() => setOpen(false)} className="hover:text-primary transition-colors text-lg tracking-wide">
                     {link.name}
                 </Link>
