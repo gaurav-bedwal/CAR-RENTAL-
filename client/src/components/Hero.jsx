@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import BookingForm from './BookingForm'
 
 const Hero = () => {
-    const { assets } = useAppContext()
+    const { assets, isAdmin } = useAppContext()
 
     return (
         <div className='relative min-h-[90vh] flex flex-col items-center justify-center bg-[#0a0a0a] overflow-hidden pt-28 pb-10'>
@@ -84,15 +84,17 @@ const Hero = () => {
             </div>
 
             {/* Separated Booking Form */}
-            <motion.div 
-                id="booking-section"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className='w-full px-6 mt-16 md:mt-24 max-w-6xl z-20'
-            >
-                <BookingForm />
-            </motion.div>
+            {!isAdmin && (
+                <motion.div 
+                    id="booking-section"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className='w-full px-6 mt-16 md:mt-24 max-w-6xl z-20'
+                >
+                    <BookingForm />
+                </motion.div>
+            )}
 
             {/* Scroll Indicator */}
             <motion.div 
