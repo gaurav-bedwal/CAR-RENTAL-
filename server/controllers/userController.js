@@ -191,13 +191,21 @@ export const submitFeedback = async (req, res) => {
     }
 }
 
-// Skip Feedback Prompt
-export const skipFeedback = async (req, res) => {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Get High-Rated Feedbacks for Testimonials (Public)
+export const getPublicFeedback = async (req, res) => {
     try {
-        req.user.lastFeedbackPromptedAt = new Date();
-        await req.user.save();
-        res.json({ success: true, message: "Prompt skipped." });
+        const feedbacks = await Feedback.find({ rating: { $gte: 4 } })
+            .populate('user', 'name image')
+            .sort({ createdAt: -1 })
+            .limit(6);
+            
+        res.json({ success: true, feedbacks });
     } catch (error) {
+        console.log(error.message);
         res.json({ success: false, message: error.message });
     }
 }
