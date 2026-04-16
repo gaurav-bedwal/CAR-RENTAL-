@@ -187,10 +187,18 @@ export const submitFeedback = async (req, res) => {
 
         res.json({ success: true, message: "Thank you for your valuable feedback!" });
     } catch (error) {
+        console.log(error.message);
         res.json({ success: false, message: error.message });
     }
 }
 
+// Skip Feedback Prompt
+export const skipFeedback = async (req, res) => {
+    try {
+        req.user.lastFeedbackPromptedAt = new Date();
+        await req.user.save();
+        res.json({ success: true, message: "Prompt skipped." });
+    } catch (error) {
         res.json({ success: false, message: error.message });
     }
 }
