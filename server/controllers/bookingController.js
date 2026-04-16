@@ -133,3 +133,26 @@ export const changeBookingStatus = async (req, res)=>{
         res.json({success: false, message: error.message})
     }
 }
+
+// API to Delete Booking (Admin Only)
+export const deleteBooking = async (req, res) => {
+    try {
+        const { bookingId } = req.body;
+        const { role } = req.user;
+
+        if (role !== 'admin') {
+            return res.json({ success: false, message: "Unauthorized. Admin only." });
+        }
+
+        const deletedBooking = await Booking.findByIdAndDelete(bookingId);
+        
+        if (!deletedBooking) {
+            return res.json({ success: false, message: "Booking not found" });
+        }
+
+        res.json({ success: true, message: "Booking Permanently Deleted" });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
