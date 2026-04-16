@@ -20,7 +20,7 @@ import { useAppContext } from './context/AppContext'
 
 const App = () => {
 
-  const {showLogin, isDbConnected, dbMessage} = useAppContext()
+  const {showLogin, isDbConnected, dbMessage, isAdmin} = useAppContext()
   const isOwnerPath = useLocation().pathname.startsWith('/owner')
 
   return (
@@ -33,7 +33,7 @@ const App = () => {
         </div>
       )}
 
-      {!isOwnerPath && <Chatbot />}
+      {!isOwnerPath && !isAdmin && <Chatbot />}
       <FeedbackPopup />
 
       {showLogin && <Login/>}
