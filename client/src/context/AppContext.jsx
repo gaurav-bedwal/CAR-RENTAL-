@@ -97,7 +97,7 @@ export const AppProvider = ({ children })=>{
     useEffect(()=>{
         if(token){
             sessionStorage.setItem('token', token)
-            axios.defaults.headers.common['Authorization'] = `${token}`
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
             fetchUser()
         } else {
             sessionStorage.removeItem('token')
