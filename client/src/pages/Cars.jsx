@@ -15,9 +15,9 @@ const Cars = () => {
   const pickupDate = searchParams.get('pickupDate')
   const returnDate = searchParams.get('returnDate')
 
-  const { cars, axios } = useAppContext()
+  const { cars, axios, searchQuery, setSearchQuery } = useAppContext()
 
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(searchQuery || '')
 
   const isSearchData = pickupLocation && pickupDate && returnDate
   const [filteredCars, setFilteredCars] = useState([])
@@ -49,6 +49,11 @@ const Cars = () => {
     })
     setFilteredCars(filtered)
   }
+
+  // Effect to sync context search query with local input
+  useEffect(() => {
+    setInput(searchQuery)
+  }, [searchQuery])
 
   const searchCarAvailablity = async () => {
     const { data } = await axios.post('/api/bookings/check-availability', { location: pickupLocation, pickupDate, returnDate })
@@ -96,6 +101,7 @@ const Cars = () => {
           <input 
              onChange={(e) => {
                setInput(e.target.value);
+               setSearchQuery(e.target.value);
                setIsDropdownVisible(true);
              }} 
              onFocus={() => setIsDropdownVisible(true)}

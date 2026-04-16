@@ -7,7 +7,7 @@ import {motion} from 'motion/react'
 
 const Navbar = () => {
 
-    const {setShowLogin, user, logout, isAdmin, axios, setIsAdmin} = useAppContext()
+    const {setShowLogin, user, logout, isAdmin, axios, setIsAdmin, searchQuery, setSearchQuery} = useAppContext()
 
     const location = useLocation()
     const [open, setOpen] = useState(false)
@@ -32,7 +32,19 @@ const Navbar = () => {
             ))}
 
             <div className='hidden lg:flex items-center text-sm gap-2 border border-borderColor px-4 py-2 rounded-full max-w-56 bg-black/20 focus-within:border-primary transition-colors'>
-                <input type="text" className="w-full bg-transparent outline-none placeholder-gray-400 text-white" placeholder="Search cars"/>
+                <input 
+                    type="text" 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            navigate('/cars');
+                            setOpen(false);
+                        }
+                    }}
+                    className="w-full bg-transparent outline-none placeholder-gray-400 text-white" 
+                    placeholder="Search cars"
+                />
                 <img src={assets.search_icon} alt="search" className="brightness-200 opacity-60" />
             </div>
 

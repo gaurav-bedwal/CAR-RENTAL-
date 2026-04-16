@@ -22,6 +22,7 @@ export const AppProvider = ({ children })=>{
     const [showLogin, setShowLogin] = useState(false)
     const [pickupDate, setPickupDate] = useState('')
     const [returnDate, setReturnDate] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
 
     const [cars, setCars] = useState([])
     const [isDbConnected, setIsDbConnected] = useState(true)
@@ -108,7 +109,7 @@ export const AppProvider = ({ children })=>{
         navigate, currency, axios, user, setUser,
         token, setToken, isAdmin, setIsAdmin, fetchUser, showLogin, setShowLogin, logout, fetchCars, cars, setCars, 
         pickupDate, setPickupDate, returnDate, setReturnDate, assets,
-        isDbConnected, dbMessage
+        isDbConnected, dbMessage, searchQuery, setSearchQuery
     }
 
     return (
