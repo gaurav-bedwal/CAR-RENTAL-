@@ -14,7 +14,7 @@ const Home = () => {
       <FeaturedSection />
       {!isAdmin && <Banner />}
       <Testimonial />
-      <Newsletter />
+      {!isAdmin && <Newsletter />}
     </>
   )
 }
