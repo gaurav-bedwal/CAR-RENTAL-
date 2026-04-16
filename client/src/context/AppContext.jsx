@@ -16,7 +16,13 @@ export const AppProvider = ({ children })=>{
     const navigate = useNavigate()
     const currency = import.meta.env.VITE_CURRENCY
 
-    const [token, setToken] = useState(() => sessionStorage.getItem('token') || null)
+    const [token, setToken] = useState(() => {
+        const storedToken = sessionStorage.getItem('token')
+        if (storedToken) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
+        }
+        return storedToken || null
+    })
     const [user, setUser] = useState(null)
     const [isAdmin, setIsAdmin] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
@@ -82,12 +88,12 @@ export const AppProvider = ({ children })=>{
     }
 
 
-    // UseEffect to fetch cars on initial load and clear legacy storage
+    // UseEffect to fetch cars on initial load
     useEffect(()=>{
-        // SECURITY FIX: Explicitly clear any legacy storage from old versions of the site
-        // to ensure "Logout on Refresh" and "Individual Tab Sessions" are enforced.
-        localStorage.removeItem('token');
-        localStorage.clear(); // Complete wipe of legacy session data
+        // Clean up legacy storage once
+        if (localStorage.getItem('token')) {
+            localStorage.removeItem('token');
+        }
         
         fetchCars()
     },[])
