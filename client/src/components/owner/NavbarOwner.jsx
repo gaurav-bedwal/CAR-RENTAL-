@@ -19,6 +19,7 @@ const NavbarOwner = () => {
         {/* Navigation Links Bridge */}
         <div className='hidden lg:flex items-center gap-8'>
           <Link to='/owner' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Dashboard</Link>
+          <Link to='/owner/add-car' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Add Vehicle</Link>
           <Link to='/owner/manage-cars' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Fleet View</Link>
         </div>
       </div>

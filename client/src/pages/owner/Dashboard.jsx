@@ -89,15 +89,6 @@ const Dashboard = () => {
             </svg>
             View Ratings
           </button>
-          <button 
-            onClick={() => window.location.href = '/owner/add-car'}
-            className='flex items-center justify-center gap-3 px-8 py-4 bg-primary text-[#0a0a0a] rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] hover:bg-primary/90 transition-all group'
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4 group-hover:rotate-90 transition-transform">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Add New Vehicle
-          </button>
         </div>
       </div>
 
