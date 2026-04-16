@@ -201,6 +201,9 @@ export const getDashboardData = async (req, res) =>{
         // Calculate monthlyRevenue from bookings where status is confirmed
         const monthlyRevenue = bookings.filter(booking => booking.status === 'confirmed').reduce((acc, booking)=> acc + (booking.price || 0), 0)
 
+        // Fetch recent feedbacks for dashboard
+        const recentFeedbacks = await Feedback.find({}).populate('user', 'name email image').sort({createdAt: -1}).limit(5);
+
         const dashboardData = {
             totalCars: cars.length,
             totalBookings: bookings.length,
@@ -208,7 +211,8 @@ export const getDashboardData = async (req, res) =>{
             completedBookings: completedBookings.length,
             recentBookings: bookings.slice(0,3),
             monthlyRevenue,
-            allCars: cars
+            allCars: cars,
+            recentFeedbacks
         }
 
         res.json({ success: true, dashboardData });
