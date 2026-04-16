@@ -25,7 +25,6 @@ const App = () => {
 
   return (
     <div className='min-h-screen relative'>
-     <Chatbot />
      <Toaster />
       {!isDbConnected && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 backdrop-blur-md rounded-full shadow-lg transition-all animate-pulse">
@@ -34,7 +33,7 @@ const App = () => {
         </div>
       )}
 
-      <Chatbot />
+      {!isOwnerPath && <Chatbot />}
       <FeedbackPopup />
 
       {showLogin && <Login/>}
