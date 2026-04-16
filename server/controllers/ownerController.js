@@ -2,6 +2,7 @@ import imagekit from "../configs/imageKit.js";
 import Booking from "../models/Booking.js";
 import Car from "../models/Car.js";
 import User from "../models/User.js";
+import Feedback from "../models/Feedback.js";
 import fs from "fs";
 
 
@@ -254,3 +255,16 @@ export const updateUserImage = async (req, res)=>{
         res.json({success: false, message: error.message})
     }
 }   
+
+// Fetch all feedbacks
+export const getFeedbacks = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') return res.json({ success: false, message: "Unauthorized. Admin only." });
+        
+        const feedbacks = await Feedback.find({}).populate('user', 'name email image').sort({createdAt: -1});
+        res.json({ success: true, feedbacks });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}

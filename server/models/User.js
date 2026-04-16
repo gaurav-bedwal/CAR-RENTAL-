@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema({
     securityQuestion: {type: String, default: ''},
     securityAnswer: {type: String, default: ''},
     currentSessionId: {type: String, default: ''},
+    lastFeedbackPromptedAt: {type: Date, default: null},
 },{timestamps: true})
 
 const User = mongoose.model('User', userSchema)

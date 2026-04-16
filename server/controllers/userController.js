@@ -2,6 +2,7 @@ import User from "../models/User.js"
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Car from "../models/Car.js";
+import Feedback from "../models/Feedback.js";
 
 
 // Generate JWT Token
@@ -158,6 +159,44 @@ export const resetPassword = async (req, res) => {
 
         res.json({ success: true, message: "Password reset successfully. You can now log in." });
 
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Submit Customer Feedback
+export const submitFeedback = async (req, res) => {
+    try {
+        const { rating, message, tags } = req.body;
+        const userId = req.user._id;
+
+        if (!rating || !message) {
+            return res.json({ success: false, message: "Rating and message are required" });
+        }
+
+        await Feedback.create({
+            user: userId,
+            rating,
+            message,
+            tags: tags || []
+        });
+
+        // Update the user's promptedAt timestamp so they aren't bothered again for 7 days
+        req.user.lastFeedbackPromptedAt = new Date();
+        await req.user.save();
+
+        res.json({ success: true, message: "Thank you for your valuable feedback!" });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Skip Feedback Prompt
+export const skipFeedback = async (req, res) => {
+    try {
+        req.user.lastFeedbackPromptedAt = new Date();
+        await req.user.save();
+        res.json({ success: true, message: "Prompt skipped." });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }

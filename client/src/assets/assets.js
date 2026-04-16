@@ -94,6 +94,7 @@ export const menuLinks = [
     { name: "Home", path: "/" },
     { name: "Cars", path: "/cars" },
     { name: "My Bookings", path: "/my-bookings" },
+    { name: "Feedback", path: "/feedback" },
 ]
 
 export const ownerMenuLinks = [
@@ -101,6 +102,7 @@ export const ownerMenuLinks = [
     { name: "Add car", path: "/owner/add-car", icon: addIcon, coloredIcon: addIconColored },
     { name: "Approve Cars", path: "/owner/manage-cars", icon: carIcon, coloredIcon: carIconColored },
     { name: "Approve Bookings", path: "/owner/manage-bookings", icon: listIcon, coloredIcon: listIconColored },
+    { name: "Feedback Analytics", path: "/owner/feedback", icon: star_icon, coloredIcon: star_icon },
 ]
 
 export const dummyUserData = {

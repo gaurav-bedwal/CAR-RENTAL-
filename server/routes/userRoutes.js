@@ -1,5 +1,5 @@
 import express from "express";
-import { getCars, getSecurityQuestion, getUserData, loginUser, registerUser, resetPassword } from "../controllers/userController.js";
+import { getCars, getSecurityQuestion, getUserData, loginUser, registerUser, resetPassword, submitFeedback, skipFeedback } from "../controllers/userController.js";
 import { processChatMessage } from "../controllers/chatController.js";
 import { protect } from "../middleware/auth.js";
 
@@ -12,5 +12,7 @@ userRouter.post('/reset-password', resetPassword)
 userRouter.post('/chat', processChatMessage)
 userRouter.get('/data', protect, getUserData)
 userRouter.get('/cars', getCars)
+userRouter.post('/submit-feedback', protect, submitFeedback)
+userRouter.post('/skip-feedback', protect, skipFeedback)
 
 export default userRouter;
