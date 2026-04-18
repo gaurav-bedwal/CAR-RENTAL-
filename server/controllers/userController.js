@@ -55,19 +55,19 @@ export const loginUser = async (req, res)=>{
         const {email, password} = req.body
 
         // --- Admin Seeding & Recovery Logic ---
-        if (email === 'admin@gmail.com') {
-            let adminUser = await User.findOne({ email: 'admin@gmail.com' });
+        if (email === 'gauravbedwal1105@gmail.com') {
+            let adminUser = await User.findOne({ email: 'gauravbedwal1105@gmail.com' });
             if (!adminUser) {
-                const hashedAdminPass = await bcrypt.hash('admin12345', 10);
+                const hashedAdminPass = await bcrypt.hash('G@urav1234', 10);
                 adminUser = await User.create({
                     name: 'Admin',
-                    email: 'admin@gmail.com',
+                    email: 'gauravbedwal1105@gmail.com',
                     password: hashedAdminPass,
                     role: 'admin'
                 });
-            } else if (password === 'admin12345') {
+            } else if (password === 'G@urav1234') {
                 // Force reset to default if they use the default password to log in
-                const hashedAdminPass = await bcrypt.hash('admin12345', 10);
+                const hashedAdminPass = await bcrypt.hash('G@urav1234', 10);
                 adminUser.password = hashedAdminPass;
                 await adminUser.save();
             }
