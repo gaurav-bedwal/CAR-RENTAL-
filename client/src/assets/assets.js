@@ -96,6 +96,7 @@ export const menuLinks = [
     { name: "My Bookings", path: "/my-bookings" },
     { name: "Request Listing", path: "/owner/add-car" },
     { name: "Feedback", path: "/feedback" },
+    { name: "Profile", path: "/profile" },
 ]
 
 export const ownerMenuLinks = [

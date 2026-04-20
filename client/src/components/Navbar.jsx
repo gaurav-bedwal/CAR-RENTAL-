@@ -24,44 +24,53 @@ const Navbar = () => {
             <motion.h1 whileHover={{scale: 1.05}} className="text-2xl font-bold tracking-wider text-primary">RENT<span className="text-white">LUX</span></motion.h1>
         </Link>
 
-        <div className={`max-sm:fixed max-sm:h-screen max-sm:w-full max-sm:top-[73px] max-sm:border-t border-borderColor right-0 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 max-sm:p-4 transition-all duration-300 z-50 bg-[#0a0a0ae6] backdrop-blur-md sm:bg-transparent ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}>
-            {menuLinks.filter(link => {
-                // If admin, show everything except standard user portal items
-                if (isAdmin) return !(link.name === 'My Bookings' || link.name === 'Feedback' || link.name === 'Request Listing');
-                
-                // If guest, only show Home, Cars, About Us (if any)
-                if (!user) return (link.name === 'Home' || link.name === 'Cars');
-                
-                // If user, show everything
-                return true;
-            }).map((link, index)=> (
-                <Link key={index} to={link.path} onClick={() => { setOpen(false); window.scrollTo(0,0); }} className="hover:text-primary transition-colors text-lg tracking-wide">
-                    {link.name}
-                </Link>
-            ))}
+        <div className={`max-sm:fixed max-sm:h-screen max-sm:w-full max-sm:top-[73px] max-sm:border-t border-borderColor right-0 flex flex-col sm:flex-row items-center gap-6 md:gap-10 lg:gap-12 max-sm:p-8 transition-all duration-300 z-50 bg-[#0a0a0ae6] backdrop-blur-md sm:bg-transparent ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"}`}>
+            
+            {/* Main Navigation Links */}
+            <div className='flex flex-col sm:flex-row items-center gap-6 lg:gap-10'>
+                {menuLinks.filter(link => {
+                    if (isAdmin) return !(link.name === 'My Bookings' || link.name === 'Feedback' || link.name === 'Request Listing' || link.name === 'Profile');
+                    if (!user) return (link.name === 'Home' || link.name === 'Cars');
+                    return true;
+                }).map((link, index) => (
+                    <Link 
+                        key={index} 
+                        to={link.path} 
+                        onClick={() => { setOpen(false); window.scrollTo(0,0); }} 
+                        className={`text-sm font-medium tracking-wide transition-all hover:text-primary ${location.pathname === link.path ? 'text-primary' : 'text-gray-400'}`}
+                    >
+                        {link.name}
+                    </Link>
+                ))}
+            </div>
 
-
-
-            <div className='flex max-sm:flex-col items-start sm:items-center gap-6'>
+            {/* Right Side Actions */}
+            <div className='flex flex-col sm:flex-row items-center gap-6 lg:gap-8'>
                 {!isAdmin && (
-                    <button onClick={() => { navigate('/cars'); setOpen(false); }} className="hidden lg:flex items-center gap-2 text-primary font-black uppercase text-[10px] tracking-[0.2em] border border-primary/30 px-6 py-2.5 rounded-full hover:bg-primary hover:text-black transition-all cursor-pointer">
+                    <button 
+                        onClick={() => { navigate('/cars'); setOpen(false); window.scrollTo(0,0); }} 
+                        className="hidden xl:flex items-center gap-2.5 text-primary font-bold uppercase text-[10px] tracking-[0.2em] border border-primary/30 px-6 py-2.5 rounded-full hover:bg-primary hover:text-black transition-all"
+                    >
                         <img src={assets.calendar_icon_colored} alt="" className="w-3.5 h-3.5 brightness-0 group-hover:brightness-100" />
                         Reserve A Car
                     </button>
                 )}
 
                 {isAdmin ? (
-                   <button onClick={() => { navigate('/owner'); setOpen(false); window.scrollTo(0,0); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide">Admin Dashboard</button>
-                ) : (
-                    user && (
-                        <div className="flex items-center gap-6">
-                            <button onClick={() => { navigate('/profile'); setOpen(false); window.scrollTo(0,0); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-primary/50 pb-1">Profile</button>
-                            <button onClick={() => { navigate('/owner/add-car'); setOpen(false); window.scrollTo(0,0); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-white/20 pb-1">Request Listing</button>
-                        </div>
-                    )
-                )}
+                   <button 
+                        onClick={() => { navigate('/owner'); setOpen(false); window.scrollTo(0,0); }} 
+                        className="text-sm font-bold uppercase tracking-widest text-primary hover:text-white transition-colors"
+                    >
+                        Admin Dashboard
+                    </button>
+                ) : null}
 
-                <button onClick={()=> {user ? logout() : setShowLogin(true); setOpen(false);}} className="cursor-pointer px-8 py-2.5 bg-primary hover:bg-primary-dull transition-all text-[#0a0a0a] font-semibold rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] uppercase tracking-wider text-sm">{user ? 'Logout' : 'Login'}</button>
+                <button 
+                    onClick={()=> {user ? logout() : setShowLogin(true); setOpen(false);}} 
+                    className="px-8 py-3 bg-primary hover:bg-white transition-all text-[#0a0a0a] font-bold rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.2)] uppercase tracking-widest text-xs"
+                >
+                    {user ? 'Logout' : 'Login'}
+                </button>
             </div>
         </div>
 
