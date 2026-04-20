@@ -75,7 +75,7 @@ const Dashboard = () => {
   return (
     <div className='flex-1 py-10'>
       <div className='flex flex-col md:flex-row md:items-center justify-between gap-6'>
-        <Title title="Admin Dashboard" subTitle="Monitor overall platform performance including total cars, bookings, revenue, and recent activities" />
+        <Title title="Administrator Control" subTitle="Monitor platform performance including active inventory, confirmed bookings, and revenue growth" />
         <div className="flex items-center gap-4">
           <button 
             onClick={() => {

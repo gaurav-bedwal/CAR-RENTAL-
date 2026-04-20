@@ -215,7 +215,7 @@ const Profile = () => {
                                 Have a luxury car you'd like to list? Partner with us and start earning high-premium returns today.
                             </p>
                             <button 
-                                onClick={() => { navigate('/owner/add-car'); window.scrollTo(0,0); }}
+                                onClick={() => { navigate('/request-listing'); window.scrollTo(0,0); }}
                                 className='w-full py-4 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5'
                             >
                                 Request Car Listing

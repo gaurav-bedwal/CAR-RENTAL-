@@ -12,8 +12,11 @@ const Layout = () => {
   useEffect(() => {
     if (!token) {
       navigate('/')
+    } else if (!isAdmin) {
+      // Strictly prevent non-admins from seeing the owner sidebar/layout
+      navigate('/profile')
     }
-  }, [token])
+  }, [token, isAdmin])
 
   if (!token) return null;
 

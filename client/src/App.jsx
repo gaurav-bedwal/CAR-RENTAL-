@@ -23,7 +23,9 @@ import { useAppContext } from './context/AppContext'
 const App = () => {
 
   const {showLogin, isDbConnected, dbMessage, isAdmin} = useAppContext()
-  const isOwnerPath = useLocation().pathname.startsWith('/owner')
+  const location = useLocation()
+  const isOwnerPath = location.pathname.startsWith('/owner')
+  const isRequestListingPath = location.pathname === '/request-listing'
 
   return (
     <div className='min-h-screen relative'>
@@ -49,6 +51,11 @@ const App = () => {
       <Route path='/my-bookings' element={<MyBookings/>}/>
       <Route path='/feedback' element={<ProvideFeedback/>}/>
       <Route path='/profile' element={<Profile/>}/>
+      <Route path='/request-listing' element={
+        <div className='min-h-screen pt-20'>
+          <AddCar />
+        </div>
+      }/>
       <Route path='/owner' element={<Layout />}>
         <Route index element={<Dashboard />}/>
         <Route path="add-car" element={<AddCar />}/>
