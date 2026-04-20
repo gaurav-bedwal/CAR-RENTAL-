@@ -6,14 +6,16 @@ import { useAppContext } from '../../context/AppContext'
 
 const Layout = () => {
 
-  const { token } = useAppContext()
+  const { token, isAdmin } = useAppContext()
   const navigate = useNavigate()
 
   useEffect(() => {
     if (!token) {
       navigate('/')
+    } else if (!isAdmin) {
+      navigate('/profile') // Redirect regular users to profile
     }
-  }, [token])
+  }, [token, isAdmin])
 
   if (!token) return null;
 

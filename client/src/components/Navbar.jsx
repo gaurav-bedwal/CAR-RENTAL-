@@ -47,7 +47,6 @@ const Navbar = () => {
                     user && (
                         <div className="flex items-center gap-6">
                             <button onClick={() => { navigate('/profile'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-primary/50 pb-1">Profile</button>
-                            <button onClick={() => { navigate('/owner/add-car'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-white/20 pb-1">Request Listing</button>
                         </div>
                     )
                 )}
