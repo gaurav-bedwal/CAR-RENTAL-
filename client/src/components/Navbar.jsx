@@ -42,11 +42,12 @@ const Navbar = () => {
                 )}
 
                 {isAdmin ? (
-                   <button onClick={() => { navigate('/owner'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide">Admin Dashboard</button>
+                   <button onClick={() => { navigate('/owner'); setOpen(false); window.scrollTo(0,0); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide">Admin Dashboard</button>
                 ) : (
                     user && (
                         <div className="flex items-center gap-6">
-                            <button onClick={() => { navigate('/profile'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-primary/50 pb-1">Profile</button>
+                            <button onClick={() => { navigate('/profile'); setOpen(false); window.scrollTo(0,0); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-primary/50 pb-1">Profile</button>
+                            <button onClick={() => { navigate('/owner/add-car'); setOpen(false); window.scrollTo(0,0); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-white/20 pb-1">Request Listing</button>
                         </div>
                     )
                 )}

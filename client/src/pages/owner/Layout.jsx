@@ -12,10 +12,8 @@ const Layout = () => {
   useEffect(() => {
     if (!token) {
       navigate('/')
-    } else if (!isAdmin) {
-      navigate('/profile') // Redirect regular users to profile
     }
-  }, [token, isAdmin])
+  }, [token])
 
   if (!token) return null;
 
