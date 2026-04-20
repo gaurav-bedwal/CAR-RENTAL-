@@ -13,14 +13,14 @@ const NavbarOwner = () => {
       <div className='flex items-center gap-10'>
         <Link to='/' className="text-2xl font-black tracking-tighter text-white uppercase flex items-center">
           <span className="text-primary pr-0.5">RENT</span>LUX
-          <span className='ml-3 px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-[10px] text-primary tracking-widest font-black uppercase'>Control Center</span>
+          <span className='ml-3 px-2 py-0.5 bg-primary/10 border border-primary/20 rounded-md text-[10px] text-primary tracking-widest font-black uppercase'>ADMIN</span>
         </Link>
         
         {/* Navigation Links Bridge */}
         <div className='hidden lg:flex items-center gap-8'>
           <Link to='/owner' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Dashboard</Link>
           <Link to='/owner/add-car' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Add Vehicle</Link>
-          <Link to='/owner/manage-cars' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Inventory</Link>
+          <Link to='/owner/manage-cars' className='text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all'>Fleet View</Link>
         </div>
       </div>
 

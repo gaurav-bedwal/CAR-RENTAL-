@@ -113,22 +113,12 @@ const Profile = () => {
                     </div>
                     
                     {!isEditing && (
-                        <div className='flex flex-col gap-3'>
-                            <button 
-                                onClick={() => setIsEditing(true)}
-                                className='px-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-white hover:border-primary transition-all'
-                            >
-                                Edit Profile
-                            </button>
-                            {userData.role === 'admin' && (
-                                <button 
-                                    onClick={() => { navigate('/owner'); window.scrollTo(0,0); }}
-                                    className='px-8 py-3 rounded-2xl bg-primary/10 border border-primary/20 text-xs font-bold uppercase tracking-widest text-primary hover:bg-primary hover:text-black transition-all'
-                                >
-                                    Admin Dashboard
-                                </button>
-                            )}
-                        </div>
+                        <button 
+                            onClick={() => setIsEditing(true)}
+                            className='px-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-white hover:border-primary transition-all'
+                        >
+                            Edit Profile
+                        </button>
                     )}
                 </div>
 
@@ -215,7 +205,7 @@ const Profile = () => {
                                 Have a luxury car you'd like to list? Partner with us and start earning high-premium returns today.
                             </p>
                             <button 
-                                onClick={() => { navigate('/request-listing'); window.scrollTo(0,0); }}
+                                onClick={() => { navigate('/owner/add-car'); window.scrollTo(0,0); }}
                                 className='w-full py-4 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5'
                             >
                                 Request Car Listing

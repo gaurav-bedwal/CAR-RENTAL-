@@ -56,6 +56,15 @@ const Navbar = () => {
                     </button>
                 )}
 
+                {isAdmin ? (
+                   <button 
+                        onClick={() => { navigate('/owner'); setOpen(false); window.scrollTo(0,0); }} 
+                        className="text-sm font-bold uppercase tracking-widest text-primary hover:text-white transition-colors"
+                    >
+                        Admin Dashboard
+                    </button>
+                ) : null}
+
                 <button 
                     onClick={()=> {user ? logout() : setShowLogin(true); setOpen(false);}} 
                     className="px-8 py-3 bg-primary hover:bg-white transition-all text-[#0a0a0a] font-bold rounded-xl shadow-[0_0_20px_rgba(212,175,55,0.2)] uppercase tracking-widest text-xs"

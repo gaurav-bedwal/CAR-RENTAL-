@@ -132,7 +132,7 @@ const AddCar = () => {
   return (
     <div className='px-4 py-10 md:px-10 flex-1'>
 
-      <Title title={isAdmin ? "Add New Car" : "Request Car Listing"} subTitle={isAdmin ? "Add a new vehicle directly to the platform's active catalog." : "Submit your car details and mandatory documents for administrative review."}/>
+      <Title title={isAdmin ? "Add New Car to Fleet" : "Request Car Listing"} subTitle={isAdmin ? "Add a new vehicle directly to the platform's active fleet." : "Submit your car details and mandatory documents for administrative review."}/>
 
       <form onSubmit={onSubmitHandler} className='flex flex-col gap-8 text-gray-400 text-sm mt-10 max-w-2xl'>
 
