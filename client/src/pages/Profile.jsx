@@ -195,8 +195,24 @@ const Profile = () => {
                         </div>
                     </div>
 
-                    {/* Danger Zone */}
+                    {/* Side Actions Area */}
                     <div className='flex flex-col gap-8'>
+                        
+                        {/* Request Listing Portal */}
+                        <div className='bg-primary/[0.02] border border-primary/10 rounded-[2.5rem] p-10'>
+                            <h2 className='text-lg font-black text-primary uppercase tracking-widest mb-4'>Earn with RentLux</h2>
+                            <p className='text-xs text-gray-500 leading-relaxed mb-8 text-neutral-400'>
+                                Have a luxury car you'd like to list? Partner with us and start earning high-premium returns today.
+                            </p>
+                            <button 
+                                onClick={() => { navigate('/owner/add-car'); window.scrollTo(0,0); }}
+                                className='w-full py-4 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5'
+                            >
+                                Request Car Listing
+                            </button>
+                        </div>
+
+                        {/* Danger Zone */}
                         <div className='bg-red-500/[0.02] border border-red-500/10 rounded-[2.5rem] p-10'>
                             <h2 className='text-lg font-black text-red-500 uppercase tracking-widest mb-4'>Danger Zone</h2>
                             <p className='text-xs text-gray-500 leading-relaxed mb-8'>
