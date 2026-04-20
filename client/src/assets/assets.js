@@ -102,6 +102,7 @@ export const ownerMenuLinks = [
     { name: "Add car", path: "/owner/add-car", icon: addIcon, coloredIcon: addIconColored },
     { name: "Approve Cars", path: "/owner/manage-cars", icon: carIcon, coloredIcon: carIconColored },
     { name: "Approve Bookings", path: "/owner/manage-bookings", icon: listIcon, coloredIcon: listIconColored },
+    { name: "Clients", path: "/owner/clients", icon: users_icon, coloredIcon: users_icon },
 ]
 
 export const dummyUserData = {

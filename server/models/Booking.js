@@ -11,6 +11,11 @@ const bookingSchema = new mongoose.Schema({
     price: {type: Number, required: true}
 },{timestamps: true})
 
+// Performance Indexes for Scalability
+bookingSchema.index({ user: 1, status: 1 });
+bookingSchema.index({ owner: 1, status: 1 });
+bookingSchema.index({ status: 1 });
+
 const Booking = mongoose.model('Booking', bookingSchema)
 
 export default Booking

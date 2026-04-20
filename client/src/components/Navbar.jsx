@@ -44,7 +44,12 @@ const Navbar = () => {
                 {isAdmin ? (
                    <button onClick={() => { navigate('/owner'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide">Admin Dashboard</button>
                 ) : (
-                    user && <button onClick={() => { navigate('/owner/add-car'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-primary/50 pb-1">Request Listing</button>
+                    user && (
+                        <div className="flex items-center gap-6">
+                            <button onClick={() => { navigate('/profile'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-primary/50 pb-1">Profile</button>
+                            <button onClick={() => { navigate('/owner/add-car'); setOpen(false); }} className="cursor-pointer hover:text-primary transition-colors tracking-wide text-xs uppercase opacity-80 border-b border-white/20 pb-1">Request Listing</button>
+                        </div>
+                    )
                 )}
 
                 <button onClick={()=> {user ? logout() : setShowLogin(true); setOpen(false);}} className="cursor-pointer px-8 py-2.5 bg-primary hover:bg-primary-dull transition-all text-[#0a0a0a] font-semibold rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] uppercase tracking-wider text-sm">{user ? 'Logout' : 'Login'}</button>

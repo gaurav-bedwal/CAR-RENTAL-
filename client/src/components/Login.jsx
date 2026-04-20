@@ -14,6 +14,8 @@ const Login = () => {
     // Security Question state
     const [securityQuestion, setSecurityQuestion] = React.useState("What is your favorite pet's name?");
     const [securityAnswer, setSecurityAnswer] = React.useState("");
+    const [mobile, setMobile] = React.useState("");
+    const [drivingLicense, setDrivingLicense] = React.useState("");
     const [fetchedQuestion, setFetchedQuestion] = React.useState(""); // Displayed during reset
 
     const onSubmitHandler = async (event) => {
@@ -25,6 +27,8 @@ const Login = () => {
                 if (state === 'register') {
                     payload.securityQuestion = securityQuestion;
                     payload.securityAnswer = securityAnswer;
+                    payload.mobile = mobile;
+                    payload.drivingLicense = drivingLicense;
                 }
                 
                 const { data } = await axios.post(`/api/user/${state}`, payload)
@@ -91,6 +95,19 @@ const Login = () => {
                    </div>
                 )}
                 
+                {state === "register" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        <div className="w-full">
+                            <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2">Mobile Number</p>
+                            <input onChange={(e) => setMobile(e.target.value)} value={mobile} placeholder="+1 234 567 890" className="border border-white/10 bg-[#0a0a0a] text-white rounded-xl w-full p-3.5 outline-none focus:border-primary/50 transition-colors placeholder-gray-600" type="tel" required />
+                        </div>
+                        <div className="w-full">
+                            <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2">Driving License</p>
+                            <input onChange={(e) => setDrivingLicense(e.target.value)} value={drivingLicense} placeholder="DL-XXXX-XXXX" className="border border-white/10 bg-[#0a0a0a] text-white rounded-xl w-full p-3.5 outline-none focus:border-primary/50 transition-colors placeholder-gray-600" type="text" required />
+                        </div>
+                    </div>
+                )}
+
                 {state === "register" && (
                      <div className="w-full p-4 border border-white/5 rounded-xl bg-white/[0.02]">
                         <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2 text-primary">Security Question (For Password Reset)</p>

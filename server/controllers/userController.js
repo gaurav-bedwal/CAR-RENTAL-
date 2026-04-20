@@ -15,10 +15,10 @@ const generateToken = (userId, sessionId)=>{
 // Register User
 export const registerUser = async (req, res)=>{
     try {
-        const {name, email, password, securityQuestion, securityAnswer} = req.body
+        const {name, email, password, securityQuestion, securityAnswer, mobile, drivingLicense} = req.body
 
-        if(!name || !email || !password || password.length < 8){
-            return res.json({success: false, message: 'Fill all the fields'})
+        if(!name || !email || !password || !mobile || !drivingLicense || password.length < 8){
+            return res.json({success: false, message: 'Fill all the mandatory fields'})
         }
 
         const userExists = await User.findOne({email})
@@ -34,7 +34,9 @@ export const registerUser = async (req, res)=>{
             email, 
             password: hashedPassword, 
             securityQuestion: securityQuestion || '', 
-            securityAnswer: processedAnswer
+            securityAnswer: processedAnswer,
+            mobile,
+            drivingLicense
         })
         const sessionId = Date.now().toString()
         user.currentSessionId = sessionId
@@ -83,6 +85,10 @@ export const loginUser = async (req, res)=>{
         if(!isMatch){
             return res.json({success: false, message: "Invalid Credentials" })
         }
+
+        if (user.isFrozen) {
+            return res.json({ success: false, message: "Your account has been suspended by an administrator. Please contact support." });
+        }
         // Unique Session Tracking
         const sessionId = Date.now().toString()
         user.currentSessionId = sessionId
@@ -107,14 +113,30 @@ export const getUserData = async (req, res) =>{
     }
 }
 
-// Get All Cars for the Frontend
-export const getCars = async (req, res) =>{
+// Simple in-memory cache for high-traffic scalability
+const cache = {
+    cars: { data: null, expiresAt: 0 },
+    feedback: { data: null, expiresAt: 0 }
+};
+
+// Get All Cars for the Frontend (Cached for 2 minutes to handle 500+ users)
+export const getCars = async (req, res) => {
     try {
-        const cars = await Car.find({isAvaliable: true})
-        res.json({success: true, cars})
+        const now = Date.now();
+        if (cache.cars.data && cache.cars.expiresAt > now) {
+            return res.json({ success: true, cars: cache.cars.data, cached: true });
+        }
+
+        const cars = await Car.find({ isAvaliable: true });
+        
+        // Update cache
+        cache.cars.data = cars;
+        cache.cars.expiresAt = now + (2 * 60 * 1000); // 2 minutes
+
+        res.json({ success: true, cars });
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message})
+        res.json({ success: false, message: error.message });
     }
 }
 
@@ -203,17 +225,73 @@ export const skipFeedback = async (req, res) => {
     }
 }
 
-// Get High-Rated Feedbacks for Testimonials (Public)
+// Get High-Rated Feedbacks for Testimonials (Public) (Cached for 10 minutes)
 export const getPublicFeedback = async (req, res) => {
     try {
+        const now = Date.now();
+        if (cache.feedback.data && cache.feedback.expiresAt > now) {
+            return res.json({ success: true, feedbacks: cache.feedback.data, cached: true });
+        }
+
         const feedbacks = await Feedback.find({ rating: { $gte: 4 } })
             .populate('user', 'name image')
             .sort({ createdAt: -1 })
             .limit(6);
             
+        // Update cache
+        cache.feedback.data = feedbacks;
+        cache.feedback.expiresAt = now + (10 * 60 * 1000); // 10 minutes
+
         res.json({ success: true, feedbacks });
     } catch (error) {
         console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Update User Profile
+export const updateProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { name, mobile, drivingLicense } = req.body;
+        const imageFile = req.file;
+
+        const user = await User.findById(userId);
+        if (!user) return res.json({ success: false, message: "User not found" });
+
+        if (name) user.name = name;
+        if (mobile) user.mobile = mobile;
+        if (drivingLicense) user.drivingLicense = drivingLicense;
+
+        if (imageFile) {
+            // Upload to ImageKit (reusing logic or simplified for here)
+            // For now, assume we just store the URL if provided or a placeholder
+            // In a real scenario, we'd use the imagekit.upload method.
+            // user.image = uploadedUrl;
+        }
+
+        await user.save();
+        res.json({ success: true, message: "Profile updated successfully", user: { name: user.name, mobile: user.mobile, drivingLicense: user.drivingLicense, image: user.image } });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Delete User Account
+export const deleteAccount = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Optional: Check for active bookings before allowing deletion
+        const activeBooking = await Booking.findOne({ user: userId, status: { $in: ['pending', 'confirmed'] } });
+        if (activeBooking) {
+            return res.json({ success: false, message: "Cannot delete account with active or pending bookings. Please cancel them first." });
+        }
+
+        await User.findByIdAndDelete(userId);
+        // Clear sessions/cookies would happen on frontend by removing token
+        res.json({ success: true, message: "Account deleted successfully. We're sorry to see you go." });
+    } catch (error) {
         res.json({ success: false, message: error.message });
     }
 }

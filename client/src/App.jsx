@@ -11,10 +11,12 @@ import Dashboard from './pages/owner/Dashboard'
 import AddCar from './pages/owner/AddCar'
 import ManageCars from './pages/owner/ManageCars'
 import ManageBookings from './pages/owner/ManageBookings'
+import Clients from './pages/owner/Clients'
 import Login from './components/Login'
 import Chatbot from './components/Chatbot'
 import FeedbackPopup from './components/FeedbackPopup'
 import ProvideFeedback from './pages/ProvideFeedback'
+import Profile from './pages/Profile'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
 
@@ -46,11 +48,13 @@ const App = () => {
       <Route path='/cars' element={<Cars/>}/>
       <Route path='/my-bookings' element={<MyBookings/>}/>
       <Route path='/feedback' element={<ProvideFeedback/>}/>
+      <Route path='/profile' element={<Profile/>}/>
       <Route path='/owner' element={<Layout />}>
         <Route index element={<Dashboard />}/>
         <Route path="add-car" element={<AddCar />}/>
         <Route path="manage-cars" element={<ManageCars />}/>
         <Route path="manage-bookings" element={<ManageBookings />}/>
+        <Route path="clients" element={<Clients />}/>
       </Route>
     </Routes>
 

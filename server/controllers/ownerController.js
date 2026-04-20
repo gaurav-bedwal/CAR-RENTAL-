@@ -21,63 +21,81 @@ export const changeRoleToOwner = async (req, res)=>{
 
 // API to List Car
 
-export const addCar = async (req, res)=>{
+export const addCar = async (req, res)=> {
     try {
-        const {_id} = req.user;
+        const { _id } = req.user;
         if (!req.body.carData) {
             return res.json({ success: false, message: "Missing car data" });
         }
         let car = JSON.parse(req.body.carData);
-        let image = '';
+        let imageUrl = '';
+        let rcUrl = '';
+        let pucUrl = '';
+        let insuranceUrl = '';
 
-        if (req.file) {
-            const imageFile = req.file;
-            const fileBuffer = fs.readFileSync(imageFile.path)
+        // Helper function for ImageKit upload
+        const uploadToImageKit = async (file, folder) => {
+            const fileBuffer = fs.readFileSync(file.path);
             const response = await imagekit.upload({
                 file: fileBuffer,
-                fileName: imageFile.originalname,
-                folder: '/cars'
-            })
-            image = imagekit.url({
+                fileName: file.originalname,
+                folder: folder
+            });
+            return imagekit.url({
                 path: response.filePath,
                 transformation: [{ width: '1280' }, { quality: 'auto' }, { format: 'webp' }]
             });
+        };
+
+        // Handle Image Upload
+        if (req.files && req.files.image) {
+            imageUrl = await uploadToImageKit(req.files.image[0], '/cars');
         } else if (car.image) {
-            // Upload from URL to ImageKit for consistency and optimization
             try {
-                const response = await imagekit.upload({
-                    file: car.image, // ImageKit accepts URLs directly
+                const resp = await imagekit.upload({
+                    file: car.image,
                     fileName: `car_url_${Date.now()}.jpg`,
                     folder: '/cars'
-                })
-                image = imagekit.url({
-                    path: response.filePath,
-                    transformation: [{ width: '1280' }, { quality: 'auto' }, { format: 'webp' }]
+                });
+                imageUrl = imagekit.url({
+                    path: resp.filePath,
+                    transformation: [{ width: '1280' }, { quality: 'auto' }]
                 });
             } catch (err) {
-                // If remote upload fails, fallback to direct URL but warn
-                console.log("Remote upload failed, using direct URL:", err.message);
-                image = car.image;
+                imageUrl = car.image;
             }
-        } else {
-            return res.json({ success: false, message: "Please upload an image or provide a valid URL" });
         }
+
+        // Handle Documents Upload
+        if (req.files) {
+            if (req.files.rc) rcUrl = await uploadToImageKit(req.files.rc[0], '/documents/rc');
+            if (req.files.puc) pucUrl = await uploadToImageKit(req.files.puc[0], '/documents/puc');
+            if (req.files.insurance) insuranceUrl = await uploadToImageKit(req.files.insurance[0], '/documents/insurance');
+        }
+
+        if (!imageUrl) {
+            return res.json({ success: false, message: "Please upload a car image or provide a valid URL" });
+        }
+
         const isAdmin = req.user.role === 'admin';
         
         await Car.create({
             ...car, 
             owner: _id, 
-            image,
+            image: imageUrl,
+            rcCertificate: rcUrl,
+            pucCertificate: pucUrl,
+            insuranceCertificate: insuranceUrl,
             threeSixtyImages: car.threeSixtyImages || [],
-            isAvaliable: isAdmin, // Only immediately available if admin
-            status: isAdmin ? 'approved' : 'pending' // Normal users are pending
+            isAvaliable: isAdmin,
+            status: isAdmin ? 'approved' : 'pending'
         });
 
-        res.json({success: true, message: isAdmin ? "Car Added" : "Car listing requested! Pending admin approval."})
+        res.json({ success: true, message: isAdmin ? "Car Added" : "Car listing requested! Pending admin approval." });
 
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message})
+        res.json({ success: false, message: error.message });
     }
 }
 
@@ -127,6 +145,8 @@ export const updateCar = async (req, res) => {
         if (updateData.transmission) car.transmission = updateData.transmission;
         if (updateData.features) car.features = updateData.features;
         if (updateData.threeSixtyImages) car.threeSixtyImages = updateData.threeSixtyImages;
+        if (updateData.fitnessExpiryDate) car.fitnessExpiryDate = updateData.fitnessExpiryDate;
+        if (updateData.luggageCapacity) car.luggageCapacity = updateData.luggageCapacity;
         
         // Admin approving a car
         if (updateData.status) {
@@ -267,6 +287,64 @@ export const getFeedbacks = async (req, res) => {
         
         const feedbacks = await Feedback.find({}).populate('user', 'name email image').sort({createdAt: -1});
         res.json({ success: true, feedbacks });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to Fetch All Clients (Users) for Admin
+export const getClients = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.json({ success: false, message: "Unauthorized. Admin only." });
+        }
+
+        // Fetch all users with 'user' role
+        const clients = await User.find({ role: 'user' }).select('-password');
+        
+        // Enhance clients with their booking data
+        const enhancedClients = await Promise.all(clients.map(async (client) => {
+            const bookings = await Booking.find({ user: client._id })
+                .populate('car')
+                .sort({ createdAt: -1 });
+            
+            return {
+                ...client.toObject(),
+                bookingCount: bookings.length,
+                bookings: bookings
+            };
+        }));
+
+        res.json({ success: true, clients: enhancedClients });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// API to Toggle User Account Status (Freeze/Unfreeze)
+export const toggleUserStatus = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.json({ success: false, message: "Unauthorized. Admin only." });
+        }
+
+        const { userId } = req.body;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.json({ success: false, message: "User not found" });
+        }
+
+        if (user.role === 'admin') {
+            return res.json({ success: false, message: "Cannot freeze an administrator account." });
+        }
+
+        user.isFrozen = !user.isFrozen;
+        await user.save();
+
+        res.json({ success: true, message: `Account ${user.isFrozen ? 'frozen' : 'unfrozen'} successfully`, isFrozen: user.isFrozen });
     } catch (error) {
         console.log(error.message);
         res.json({ success: false, message: error.message });

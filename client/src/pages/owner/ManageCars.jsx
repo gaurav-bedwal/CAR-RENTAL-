@@ -266,9 +266,9 @@ const ManageCars = () => {
               </div>
 
               {/* RTO Date & Age */}
-              <div className="grid grid-cols-1 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">RTO Issue Date (Calculates Age)</label>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">RTO Issue Date</label>
                   <input 
                     type="date" 
                     name="rtoDate" 
@@ -276,13 +276,36 @@ const ManageCars = () => {
                     onChange={handleEditChange}
                     className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors [color-scheme:dark]"
                   />
-                  {editingCar.rtoDate && (
-                    <p className="text-[10px] text-primary mt-1.5 font-semibold uppercase tracking-wider">
-                      Current Age: <span className="text-white">{calculateAge(editingCar.rtoDate)} Years</span>
-                    </p>
-                  )}
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-primary mb-2">Fitness Valid Upto</label>
+                  <input 
+                    type="date" 
+                    name="fitnessExpiryDate" 
+                    value={editingCar.fitnessExpiryDate ? new Date(editingCar.fitnessExpiryDate).toISOString().split('T')[0] : ''} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-primary/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors [color-scheme:dark]"
+                  />
                 </div>
               </div>
+
+              {/* Document Verification Links */}
+              {(editingCar.rcCertificate || editingCar.pucCertificate || editingCar.insuranceCertificate) && (
+                <div className="p-4 bg-orange-500/5 border border-orange-500/20 rounded-2xl">
+                    <label className="block text-[10px] uppercase tracking-widest text-orange-500 font-bold mb-3">Vehicle Documentation</label>
+                    <div className="flex gap-2">
+                        {editingCar.rcCertificate && (
+                            <a href={editingCar.rcCertificate} target="_blank" rel="noreferrer" className="flex-1 text-center py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:border-primary transition-all">View RC</a>
+                        )}
+                        {editingCar.pucCertificate && (
+                            <a href={editingCar.pucCertificate} target="_blank" rel="noreferrer" className="flex-1 text-center py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:border-primary transition-all">View PUC</a>
+                        )}
+                        {editingCar.insuranceCertificate && (
+                            <a href={editingCar.insuranceCertificate} target="_blank" rel="noreferrer" className="flex-1 text-center py-2 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-400 hover:text-white hover:border-primary transition-all">View Insurance</a>
+                        )}
+                    </div>
+                </div>
+              )}
 
               {/* Description */}
               <div>
@@ -347,18 +370,32 @@ const ManageCars = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Category</label>
-                <select 
-                  name="category" 
-                  value={editingCar.category} 
-                  onChange={handleEditChange}
-                  className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
-                >
-                  <option value="Sedan">Sedan</option>
-                  <option value="SUV">SUV</option>
-                  <option value="Van">Van</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Category</label>
+                  <select 
+                    name="category" 
+                    value={editingCar.category} 
+                    onChange={handleEditChange}
+                    className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                  >
+                    <option value="Sedan">Sedan</option>
+                    <option value="SUV">SUV</option>
+                    <option value="Van">Van</option>
+                    <option value="Luxury">Luxury</option>
+                    <option value="Sport">Sport</option>
+                  </select>
+                </div>
+                <div>
+                    <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">Luggage</label>
+                    <input 
+                      type="number" 
+                      name="luggageCapacity" 
+                      value={editingCar.luggageCapacity || 0} 
+                      onChange={handleEditChange}
+                      className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-primary/50 transition-colors"
+                    />
+                 </div>
               </div>
 
                <div>

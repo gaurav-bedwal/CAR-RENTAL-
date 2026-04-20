@@ -8,7 +8,10 @@ const userSchema = new mongoose.Schema({
     image: {type: String, default: ''},
     securityQuestion: {type: String, default: ''},
     securityAnswer: {type: String, default: ''},
+    drivingLicense: {type: String, default: ''},
+    mobile: {type: String, default: ''},
     currentSessionId: {type: String, default: ''},
+    isFrozen: {type: Boolean, default: false},
     lastFeedbackPromptedAt: {type: Date, default: null},
 },{timestamps: true})
 

@@ -29,6 +29,10 @@ export const protect = async (req, res, next)=>{
             return res.json({success: false, message: "You have been logged in on another device. Please log in again to continue."})
         }
 
+        if (user.isFrozen) {
+            return res.json({ success: false, message: "Your account has been suspended by an administrator. Please contact support." });
+        }
+
         req.user = user;
         next();
     } catch (error) {
