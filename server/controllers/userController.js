@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import Car from "../models/Car.js";
 import Feedback from "../models/Feedback.js";
+import Booking from "../models/Booking.js";
 
 
 // Generate JWT Token

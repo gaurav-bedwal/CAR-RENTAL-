@@ -10,6 +10,9 @@ import bookingRouter from "./routes/bookingRoutes.js";
 import cluster from "node:cluster";
 import os from "node:os";
 
+// Initialize Express App first (Required for Vercel export)
+const app = express();
+
 // Database Connection Check Middleware (Optimized for Scaling)
 let isConnected = false;
 const dbCheck = async (req, res, next) => {
@@ -29,74 +32,67 @@ const dbCheck = async (req, res, next) => {
     }
 };
 
-// Start Server with Clustering for 500+ Concurrent Users
+// Global Middleware
+app.use(cors({
+    origin: process.env.CLIENT_URL || "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
+
+// In production, use simplified logging to save IO
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'tiny' : 'dev'));
+app.use(express.json({ limit: '10mb' }));
+
+// Routes
+app.get('/', (req, res)=> res.send(`Server is running (Environment: ${process.env.VERCEL ? 'Vercel' : 'Local/VPS'})`))
+
+app.use('/api', dbCheck)
+app.use('/api/user', userRouter)
+app.use('/api/owner', ownerRouter)
+app.use('/api/bookings', bookingRouter)
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(`Error:`, err.message);
+    res.status(500).json({
+        success: false,
+        message: 'Internal Server Error'
+    });
+});
+
+// Start Server Logic (Clustering or Serverless)
 const startServer = async () => {
+    const PORT = process.env.PORT || 3000;
+
+    // Vercel handles scaling automatically so clustering is skipped
+    if (process.env.VERCEL) {
+        console.log("☁️ Deployment detected on Vercel. Clustering skipped.");
+        return; 
+    }
+
+    // Local/VPS High-Traffic Clustering
     const numCPUs = os.cpus().length;
 
     if (cluster.isPrimary && process.env.NODE_ENV === 'production') {
         console.log(`🚀 Primary process ${process.pid} is running. Forking for ${numCPUs} CPUs...`);
-        
-        // Fork workers
-        for (let i = 0; i < numCPUs; i++) {
-            cluster.fork();
-        }
-
-        cluster.on('exit', (worker, code, signal) => {
+        for (let i = 0; i < numCPUs; i++) cluster.fork();
+        cluster.on('exit', (worker) => {
             console.log(`⚠️ Worker ${worker.process.pid} died. Spawning a new one...`);
             cluster.fork();
         });
     } else {
-        // Workers can share any TCP connection
-        // In this case it is an HTTP server
-        const app = express();
-
-        // Middleware
-        app.use(cors({
-            origin: process.env.CLIENT_URL || "*",
-            methods: ["GET", "POST", "PUT", "DELETE"],
-            credentials: true
-        }));
-        
-        // In production, use simplified logging to save IO
-        app.use(morgan(process.env.NODE_ENV === 'production' ? 'tiny' : 'dev'));
-        app.use(express.json({ limit: '10mb' })); // Increase for large payload if needed
-
-        // --- Performance & Scaling Middleware ---
-        // Note: compression, helmet, and rate-limit should be imported and used here 
-        // if installed. Native clustering already provides the biggest boost.
-        // ----------------------------------------
-
-        // Routes
-        app.get('/', (req, res)=> res.send(`Server running on worker ${process.pid}`))
-
-        app.use('/api', dbCheck)
-        app.use('/api/user', userRouter)
-        app.use('/api/owner', ownerRouter)
-        app.use('/api/bookings', bookingRouter)
-
-        // Global Error Handler
-        app.use((err, req, res, next) => {
-            console.error(`[Worker ${process.pid}] Error:`, err.message);
-            res.status(500).json({
-                success: false,
-                message: 'Internal Server Error'
-            });
-        });
-
-        const PORT = process.env.PORT || 3000;
-        
         try {
             await connectDB();
             isConnected = true;
-            app.listen(PORT, () => console.log(`✅ Worker ${process.pid} started on port ${PORT}`));
+            app.listen(PORT, () => console.log(`✅ Server started on port ${PORT} (PID: ${process.pid})`));
         } catch (error) {
-            console.error(`❌ Worker ${process.pid} failed to connect to DB:`, error.message);
-            // Listen anyway, dbCheck will retry
-            app.listen(PORT, () => console.log(`⚠️ Worker ${process.pid} started WITHOUT DB on port ${PORT}`));
+            console.error(`❌ Failed to connect to DB:`, error.message);
+            app.listen(PORT, () => console.log(`⚠️ Server started WITHOUT DB on port ${PORT}`));
         }
     }
 };
 
 startServer();
 
-export default {}; // Minimal export for clustering compatibility
+// EXTREMELY IMPORTANT FOR VERCEL DEPLOYMENT
+export default app;
