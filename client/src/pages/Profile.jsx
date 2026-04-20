@@ -113,12 +113,22 @@ const Profile = () => {
                     </div>
                     
                     {!isEditing && (
-                        <button 
-                            onClick={() => setIsEditing(true)}
-                            className='px-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-white hover:border-primary transition-all'
-                        >
-                            Edit Profile
-                        </button>
+                        <div className='flex flex-col gap-3'>
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                className='px-8 py-3 rounded-2xl bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest text-white hover:border-primary transition-all'
+                            >
+                                Edit Profile
+                            </button>
+                            {userData.role === 'admin' && (
+                                <button 
+                                    onClick={() => { navigate('/owner'); window.scrollTo(0,0); }}
+                                    className='px-8 py-3 rounded-2xl bg-primary/10 border border-primary/20 text-xs font-bold uppercase tracking-widest text-primary hover:bg-primary hover:text-black transition-all'
+                                >
+                                    Admin Dashboard
+                                </button>
+                            )}
+                        </div>
                     )}
                 </div>
 
