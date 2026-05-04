@@ -28,6 +28,7 @@ const CarDetails = () => {
   const [totalDuration, setTotalDuration] = useState('');
   const [bookingError, setBookingError] = useState('');
   const [viewMode, setViewMode] = useState('static'); // 'static' | '360'
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (pickupDate && returnDate && car) {
@@ -81,6 +82,8 @@ const CarDetails = () => {
         return toast.error("Pricing information is missing for this selection. Please try another vehicle.");
       }
 
+      setIsSubmitting(true);
+
       const { data } = await axios.post('/api/bookings/create', {
         car: id,
         pickupDate,
@@ -96,6 +99,8 @@ const CarDetails = () => {
       }
     } catch (error) {
       toast.error(error.message)
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -289,7 +294,9 @@ const CarDetails = () => {
              <motion.p initial={{opacity: 0}} animate={{opacity: 1}} className="text-red-400 text-xs font-semibold bg-red-400/10 p-3 rounded-xl border border-red-400/20">{bookingError}</motion.p>
           )}
 
-          <button disabled={!!bookingError} className={`w-full transition-all py-4 mt-2 font-bold tracking-wider uppercase text-sm text-[#0a0a0a] rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.3)] ${bookingError ? 'bg-gray-600 cursor-not-allowed opacity-50 shadow-none' : 'bg-primary hover:bg-primary-dull cursor-pointer hover:shadow-[0_0_20px_rgba(212,175,55,0.5)]'}`}>Book Now</button>
+          <button disabled={!!bookingError || isSubmitting} className={`w-full transition-all py-4 mt-2 font-bold tracking-wider uppercase text-sm text-[#0a0a0a] rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.3)] ${(bookingError || isSubmitting) ? 'bg-gray-600 cursor-not-allowed opacity-50 shadow-none' : 'bg-primary hover:bg-primary-dull cursor-pointer hover:shadow-[0_0_20px_rgba(212,175,55,0.5)]'}`}>
+            {isSubmitting ? 'Processing...' : 'Book Now'}
+          </button>
 
           <p className='text-center text-xs text-gray-500 uppercase tracking-widest mt-4'>No credit card required to reserve</p>
 
