@@ -4,6 +4,8 @@ import jwt from 'jsonwebtoken'
 import Car from "../models/Car.js";
 import Feedback from "../models/Feedback.js";
 import Booking from "../models/Booking.js";
+import imagekit from "../configs/imageKit.js";
+import fs from "fs";
 
 
 // Generate JWT Token
@@ -265,14 +267,58 @@ export const updateProfile = async (req, res) => {
         if (drivingLicense) user.drivingLicense = drivingLicense;
 
         if (imageFile) {
-            // Upload to ImageKit (reusing logic or simplified for here)
-            // For now, assume we just store the URL if provided or a placeholder
-            // In a real scenario, we'd use the imagekit.upload method.
-            // user.image = uploadedUrl;
+            const fileBuffer = fs.readFileSync(imageFile.path);
+            const response = await imagekit.upload({
+                file: fileBuffer,
+                fileName: imageFile.originalname,
+                folder: '/users'
+            });
+
+            const optimizedImageUrl = imagekit.url({
+                path : response.filePath,
+                transformation : [
+                    {width: '400'},
+                    {quality: 'auto'},
+                    {format: 'webp'}
+                ]
+            });
+            user.image = optimizedImageUrl;
         }
 
         await user.save();
-        res.json({ success: true, message: "Profile updated successfully", user: { name: user.name, mobile: user.mobile, drivingLicense: user.drivingLicense, image: user.image } });
+        res.json({ success: true, message: "Profile updated successfully", user: { name: user.name, mobile: user.mobile, drivingLicense: user.drivingLicense, image: user.image, email: user.email, role: user.role, createdAt: user.createdAt } });
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Change Password for Logged-in User
+export const changePassword = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const { oldPassword, newPassword } = req.body;
+
+        if (!oldPassword || !newPassword) {
+            return res.json({ success: false, message: "Please provide both old and new passwords" });
+        }
+
+        if (newPassword.length < 8) {
+            return res.json({ success: false, message: "New password must be at least 8 characters" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) return res.json({ success: false, message: "User not found" });
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.json({ success: false, message: "Incorrect current password" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         res.json({ success: false, message: error.message });
     }

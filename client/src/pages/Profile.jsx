@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { assets } from '../assets/assets'
 
 const Profile = () => {
-    const { userData, setUserData, axios, setToken, navigate } = useAppContext()
+    const { user: userData, setUser: setUserData, axios, setToken, navigate } = useAppContext()
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(false)
     
@@ -14,6 +14,12 @@ const Profile = () => {
     const [drivingLicense, setDrivingLicense] = useState('')
     const [image, setImage] = useState(null)
     const [preview, setPreview] = useState(null)
+    
+    // Security Form state
+    const [oldPassword, setOldPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [passwordLoading, setPasswordLoading] = useState(false)
 
     useEffect(() => {
         if (userData) {
@@ -54,6 +60,29 @@ const Profile = () => {
             toast.error(error.message)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault()
+        if (newPassword !== confirmPassword) {
+            return toast.error("New passwords do not match")
+        }
+        setPasswordLoading(true)
+        try {
+            const { data } = await axios.post('/api/user/change-password', { oldPassword, newPassword })
+            if (data.success) {
+                toast.success(data.message)
+                setOldPassword('')
+                setNewPassword('')
+                setConfirmPassword('')
+            } else {
+                toast.error(data.message)
+            }
+        } catch (error) {
+            toast.error(error.message)
+        } finally {
+            setPasswordLoading(false)
         }
     }
 
@@ -193,11 +222,78 @@ const Profile = () => {
                                 )}
                             </form>
                         </div>
+
+                        {/* Security Section */}
+                        <div className='bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-10 mt-8'>
+                            <h2 className='text-xl font-black text-white uppercase tracking-widest mb-8 flex items-center gap-3'>
+                                <span className='w-2 h-6 bg-red-500 rounded-full'></span>
+                                Security
+                            </h2>
+
+                            <form onSubmit={handleChangePassword} className='space-y-6'>
+                                <div>
+                                    <label className='block text-[10px] uppercase tracking-[0.2em] text-gray-500 font-black mb-3'>Current Password</label>
+                                    <input 
+                                        type="password" 
+                                        value={oldPassword}
+                                        onChange={(e) => setOldPassword(e.target.value)}
+                                        required
+                                        className='w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-red-500/50 transition-all'
+                                    />
+                                </div>
+                                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                    <div>
+                                        <label className='block text-[10px] uppercase tracking-[0.2em] text-gray-500 font-black mb-3'>New Password</label>
+                                        <input 
+                                            type="password" 
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                            className='w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-red-500/50 transition-all'
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className='block text-[10px] uppercase tracking-[0.2em] text-gray-500 font-black mb-3'>Confirm New Password</label>
+                                        <input 
+                                            type="password" 
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                            className='w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white focus:outline-none focus:border-red-500/50 transition-all'
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className='pt-4'>
+                                    <button 
+                                        type="submit" 
+                                        disabled={passwordLoading}
+                                        className='px-8 py-4 bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-white/10 transition-all disabled:opacity-50'
+                                    >
+                                        {passwordLoading ? 'Updating...' : 'Change Password'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     {/* Side Actions Area */}
                     <div className='flex flex-col gap-8'>
                         
+                        {/* My Bookings Quick Link */}
+                        <div className='bg-blue-500/[0.02] border border-blue-500/10 rounded-[2.5rem] p-10'>
+                            <h2 className='text-lg font-black text-blue-500 uppercase tracking-widest mb-4'>Your Reservations</h2>
+                            <p className='text-xs text-gray-500 leading-relaxed mb-8'>
+                                View your past and upcoming luxury vehicle reservations.
+                            </p>
+                            <button 
+                                onClick={() => { navigate('/my-bookings'); window.scrollTo(0,0); }}
+                                className='w-full py-4 bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-blue-500 hover:text-white transition-all'
+                            >
+                                View My Bookings
+                            </button>
+                        </div>
+
                         {/* Request Listing Portal */}
                         <div className='bg-primary/[0.02] border border-primary/10 rounded-[2.5rem] p-10'>
                             <h2 className='text-lg font-black text-primary uppercase tracking-widest mb-4'>Earn with RentLux</h2>
@@ -205,7 +301,7 @@ const Profile = () => {
                                 Have a luxury car you'd like to list? Partner with us and start earning high-premium returns today.
                             </p>
                             <button 
-                                onClick={() => { navigate('/owner/add-car'); window.scrollTo(0,0); }}
+                                onClick={() => { navigate('/request-listing'); window.scrollTo(0,0); }}
                                 className='w-full py-4 bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-primary hover:text-black transition-all shadow-lg shadow-primary/5'
                             >
                                 Request Car Listing

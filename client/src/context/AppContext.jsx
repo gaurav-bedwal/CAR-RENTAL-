@@ -17,7 +17,7 @@ export const AppProvider = ({ children })=>{
     const currency = import.meta.env.VITE_CURRENCY
 
     const [token, setToken] = useState(() => {
-        const storedToken = sessionStorage.getItem('token')
+        const storedToken = localStorage.getItem('token')
         if (storedToken) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`
         }
@@ -44,7 +44,7 @@ export const AppProvider = ({ children })=>{
             setIsAdmin(data.user.role === 'admin')
            }else{
             setToken(null)
-            sessionStorage.removeItem('token')
+            localStorage.removeItem('token')
             axios.defaults.headers.common['Authorization'] = ''
             toast.error("Session expired or invalid.")
             navigate('/')
@@ -83,6 +83,7 @@ export const AppProvider = ({ children })=>{
         setToken(null)
         setUser(null)
         setIsAdmin(false)
+        localStorage.removeItem('token')
         axios.defaults.headers.common['Authorization'] = ''
         toast.success('You have been logged out')
     }
@@ -90,23 +91,17 @@ export const AppProvider = ({ children })=>{
 
     // UseEffect to fetch cars on initial load
     useEffect(()=>{
-        // Clean up legacy storage once
-        if (localStorage.getItem('token')) {
-            localStorage.removeItem('token');
-        }
-        
         fetchCars()
     },[])
 
-    // Sync token to sessionStorage to allow page refreshing without logging out,
-    // while strictly keeping the session isolated to the current tab.
+    // Sync token to localStorage to allow page refreshing without logging out,
     useEffect(()=>{
         if(token){
-            sessionStorage.setItem('token', token)
+            localStorage.setItem('token', token)
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
             fetchUser()
         } else {
-            sessionStorage.removeItem('token')
+            localStorage.removeItem('token')
             axios.defaults.headers.common['Authorization'] = ''
         }
     },[token])
