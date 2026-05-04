@@ -49,6 +49,7 @@ const App = () => {
       <Route path='/my-bookings' element={<MyBookings/>}/>
       <Route path='/feedback' element={<ProvideFeedback/>}/>
       <Route path='/profile' element={<Profile/>}/>
+      <Route path='/request-listing' element={<div className="bg-[#0a0a0a] min-h-screen pt-20"><div className="max-w-7xl mx-auto"><AddCar /></div></div>}/>
       <Route path='/owner' element={<Layout />}>
         <Route index element={<Dashboard />}/>
         <Route path="add-car" element={<AddCar />}/>
