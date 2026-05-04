@@ -53,10 +53,10 @@ app.use('/api/bookings', bookingRouter)
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-    console.error(`Error:`, err.message);
+    console.error(`Unhandled Server Error:`, err.stack || err.message);
     res.status(500).json({
         success: false,
-        message: 'Internal Server Error'
+        message: `Internal Server Error: ${err.message}`
     });
 });
 
