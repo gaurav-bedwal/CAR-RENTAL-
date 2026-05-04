@@ -11,7 +11,7 @@ const CarDetails = () => {
 
   const { id } = useParams()
 
-  const { cars, axios, pickupDate, setPickupDate, returnDate, setReturnDate } = useAppContext()
+  const { cars, axios, pickupDate, setPickupDate, returnDate, setReturnDate, user } = useAppContext()
 
   const getLocalISOString = () => {
     const now = new Date();
@@ -84,7 +84,7 @@ const CarDetails = () => {
 
       setIsSubmitting(true);
 
-      const { data } = await axios.post('/api/bookings/create', {
+      const { data } = await axios.post('/api/bookings/create-order', {
         car: id,
         pickupDate,
         returnDate,
@@ -92,14 +92,62 @@ const CarDetails = () => {
       })
 
       if (data.success) {
-        toast.success(data.message)
-        navigate('/my-bookings')
+         const options = {
+             key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+             amount: data.order.amount,
+             currency: data.order.currency,
+             name: "RentLux",
+             description: `Booking ${car.brand} ${car.model}`,
+             order_id: data.order.id,
+             handler: async function (response) {
+                 try {
+                     const verifyData = await axios.post('/api/bookings/verify-payment', {
+                         razorpay_order_id: response.razorpay_order_id,
+                         razorpay_payment_id: response.razorpay_payment_id,
+                         razorpay_signature: response.razorpay_signature,
+                     });
+                     
+                     if (verifyData.data.success) {
+                         toast.success("Payment successful!");
+                         navigate('/my-bookings');
+                     } else {
+                         toast.error(verifyData.data.message);
+                     }
+                 } catch (err) {
+                     toast.error("Payment verification failed");
+                 } finally {
+                     setIsSubmitting(false);
+                 }
+             },
+             prefill: {
+                 name: user?.name,
+                 email: user?.email,
+                 contact: user?.mobile
+             },
+             theme: {
+                 color: "#d4af37" // primary color
+             },
+             modal: {
+                 ondismiss: function() {
+                     setIsSubmitting(false);
+                 }
+             }
+         };
+         
+         const rzp1 = new window.Razorpay(options);
+         
+         rzp1.on('payment.failed', function (response){
+             toast.error("Payment failed: " + response.error.description);
+             setIsSubmitting(false);
+         });
+         
+         rzp1.open();
       } else {
         toast.error(data.message)
+        setIsSubmitting(false);
       }
     } catch (error) {
       toast.error(error.message)
-    } finally {
       setIsSubmitting(false);
     }
   }
@@ -298,7 +346,7 @@ const CarDetails = () => {
             {isSubmitting ? 'Processing...' : 'Book Now'}
           </button>
 
-          <p className='text-center text-xs text-gray-500 uppercase tracking-widest mt-4'>No credit card required to reserve</p>
+          <p className='text-center text-xs text-gray-500 uppercase tracking-widest mt-4'>Secure payment powered by Razorpay</p>
 
         </motion.form>
       </div>

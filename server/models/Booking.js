@@ -8,7 +8,9 @@ const bookingSchema = new mongoose.Schema({
     pickupDate: {type: Date, required: true},
     returnDate: {type: Date, required: true},
     status: {type: String, enum: ["pending", "confirmed", "cancelled", "completed"], default: "pending"},
-    price: {type: Number, required: true}
+    price: {type: Number, required: true},
+    paymentStatus: {type: String, enum: ["pending", "paid", "failed"], default: "pending"},
+    stripeSessionId: {type: String}
 },{timestamps: true})
 
 // Performance Indexes for Scalability

@@ -1,5 +1,12 @@
 import Booking from "../models/Booking.js"
 import Car from "../models/Car.js";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+
+const razorpayInstance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_mock',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'secret_mock',
+});
 
 
 // Function to Check Availability of Car for a given Date
@@ -37,7 +44,7 @@ export const checkAvailabilityOfCar = async (req, res)=>{
     }
 }
 
-// API to Create Booking
+// API to Create Booking (Legacy / Local)
 export const createBooking = async (req, res)=>{
     try {
         const {_id} = req.user;
@@ -74,6 +81,100 @@ export const createBooking = async (req, res)=>{
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
+    }
+}
+
+// API to Create Razorpay Order
+export const createRazorpayOrder = async (req, res) => {
+    try {
+        const {_id} = req.user;
+        const {car, pickupDate, returnDate, bookingMode} = req.body;
+
+        const isAvailable = await checkAvailability(car, pickupDate, returnDate)
+        if(!isAvailable){
+            return res.json({success: false, message: "Car is not available for this specific timeframe"})
+        }
+
+        const carData = await Car.findById(car)
+
+        // Calculate precise price based on strict datetime bounds
+        const picked = new Date(pickupDate);
+        const returned = new Date(returnDate);
+        const diffHrs = (returned - picked) / (1000 * 60 * 60);
+
+        let price = 0;
+        if (bookingMode === 'hourly') {
+            if (diffHrs > 6) {
+                 return res.json({success: false, message: "Hourly bookings capped at 6 hours max."})
+            }
+            const hrs = Math.ceil(diffHrs);
+            price = hrs * (carData.pricePerHour || 0);
+        } else {
+            const noOfDays = Math.max(1, Math.ceil(diffHrs / 24))
+            price = carData.pricePerDay * noOfDays;
+        }
+        
+        const options = {
+            amount: price * 100, // paise
+            currency: "INR",
+            receipt: `receipt_order_${Date.now()}`,
+        };
+
+        const order = await razorpayInstance.orders.create(options);
+
+        if (!order) {
+            return res.json({ success: false, message: "Some error occurred creating Razorpay order" });
+        }
+
+        // Create booking as pending
+        await Booking.create({
+            car, 
+            owner: carData.owner, 
+            user: _id, 
+            pickupDate, 
+            returnDate, 
+            price, 
+            status: 'pending',
+            paymentStatus: 'pending',
+            razorpayOrderId: order.id
+        })
+
+        res.json({success: true, order})
+
+    } catch (error) {
+        console.log(error.message);
+        res.json({success: false, message: error.message})
+    }
+}
+
+// API to Verify Razorpay Payment
+export const verifyRazorpayPayment = async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+        const sign = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSign = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || 'secret_mock')
+            .update(sign.toString())
+            .digest("hex");
+
+        if (razorpay_signature === expectedSign) {
+            const booking = await Booking.findOne({ razorpayOrderId: razorpay_order_id });
+            if (booking) {
+                booking.paymentStatus = 'paid';
+                booking.status = 'confirmed';
+                booking.razorpayPaymentId = razorpay_payment_id;
+                await booking.save();
+                return res.json({ success: true, message: "Payment verified successfully" });
+            } else {
+                return res.json({ success: false, message: "Booking not found" });
+            }
+        } else {
+            return res.json({ success: false, message: "Invalid signature sent!" });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
     }
 }
 
