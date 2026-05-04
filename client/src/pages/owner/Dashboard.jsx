@@ -17,6 +17,9 @@ const Dashboard = () => {
     monthlyRevenue: 0,
   })
 
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+
   const dashboardCards = [
     { title: "Total Cars", value: data.totalCars, icon: assets.carIconColored },
     { title: "Total Bookings", value: data.totalBookings, icon: assets.listIconColored },
@@ -24,9 +27,13 @@ const Dashboard = () => {
     { title: "Confirmed", value: data.completedBookings, icon: assets.listIconColored },
   ]
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (start = startDate, end = endDate) => {
     try {
-      const { data } = await axios.get('/api/owner/dashboard')
+      const queryParams = new URLSearchParams();
+      if (start) queryParams.append('startDate', start);
+      if (end) queryParams.append('endDate', end);
+
+      const { data } = await axios.get(`/api/owner/dashboard?${queryParams.toString()}`)
       if (data.success) {
         setData(data.dashboardData)
       } else {
@@ -92,6 +99,48 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Date Filter Section */}
+      <div className='my-8 p-6 bg-[#141824] border border-white/5 rounded-3xl shadow-xl flex flex-col md:flex-row gap-6 items-end justify-between'>
+        <div className='flex flex-col md:flex-row gap-6 w-full md:w-auto'>
+          <div className='flex flex-col gap-2'>
+            <label className='text-xs text-gray-500 uppercase tracking-widest font-bold'>Start Date</label>
+            <input 
+              type="date" 
+              value={startDate} 
+              onChange={(e) => setStartDate(e.target.value)} 
+              className='bg-[#0B0D17] text-gray-300 border border-white/10 p-3 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all'
+            />
+          </div>
+          <div className='flex flex-col gap-2'>
+            <label className='text-xs text-gray-500 uppercase tracking-widest font-bold'>End Date</label>
+            <input 
+              type="date" 
+              value={endDate} 
+              onChange={(e) => setEndDate(e.target.value)} 
+              className='bg-[#0B0D17] text-gray-300 border border-white/10 p-3 rounded-xl focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all'
+            />
+          </div>
+        </div>
+        <div className='flex gap-4 w-full md:w-auto'>
+          <button 
+            onClick={() => fetchDashboardData()}
+            className='flex-1 md:flex-none px-8 py-3 bg-primary text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-yellow-500 transition-colors'
+          >
+            Filter
+          </button>
+          <button 
+            onClick={() => {
+              setStartDate('');
+              setEndDate('');
+              fetchDashboardData('', '');
+            }}
+            className='flex-1 md:flex-none px-8 py-3 bg-red-500/10 text-red-400 font-black uppercase tracking-widest text-xs rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all'
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
       <div className='grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 my-10 w-full'>
         {dashboardCards.map((card, index) => (
           <div key={index} className='flex gap-4 items-center justify-between p-8 rounded-[2rem] border border-white/10 bg-[#141824]/40 backdrop-blur-sm hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 shadow-2xl group'>
@@ -153,7 +202,9 @@ const Dashboard = () => {
         <div className='p-8 bg-[#141824] border border-white/5 rounded-3xl shadow-2xl relative overflow-hidden flex flex-col justify-center'>
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[50px] rounded-full pointer-events-none"></div>
           <h1 className='text-xl md:text-2xl font-bold text-white tracking-wide'>Revenue</h1>
-          <p className='text-sm text-gray-400 mt-1 mb-6 font-light'>Earnings generated this month</p>
+          <p className='text-sm text-gray-400 mt-1 mb-6 font-light'>
+            {startDate && endDate ? `Earnings from ${startDate} to ${endDate}` : 'Earnings generated this month'}
+          </p>
           <p className='text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-primary to-yellow-600 tracking-tighter'>{currency}{data.monthlyRevenue}</p>
         </div>
       </div>

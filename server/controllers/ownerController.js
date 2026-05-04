@@ -209,17 +209,33 @@ export const getDashboardData = async (req, res) =>{
             return res.json({ success: false, message: "Unauthorized. Admin only." });
         }
 
+        const { startDate, endDate } = req.query;
+        let query = {};
+        
+        if (startDate && endDate) {
+            query.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(new Date(endDate).setHours(23, 59, 59, 999))
+            };
+        } else {
+            // Default to current month
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+            query.createdAt = { $gte: firstDay, $lte: lastDay };
+        }
+
         const cars = await Car.find({}) // All cars
-        let bookings = await Booking.find({}).populate('car').sort({ createdAt: -1 }); // All bookings
+        let bookings = await Booking.find(query).populate('car').sort({ createdAt: -1 }); // Filtered bookings
 
         // Filter out bookings where car might have been deleted (populated as null)
         bookings = bookings.filter(booking => booking.car !== null);
 
-        const pendingBookings = await Booking.find({ status: "pending" })
-        const completedBookings = await Booking.find({ status: "confirmed" })
+        const pendingBookings = bookings.filter(b => b.status === "pending")
+        const completedBookings = bookings.filter(b => b.status === "confirmed" || b.status === "completed")
 
-        // Calculate monthlyRevenue from bookings where status is confirmed
-        const monthlyRevenue = bookings.filter(booking => booking.status === 'confirmed').reduce((acc, booking)=> acc + (booking.price || 0), 0)
+        // Calculate revenue from bookings where status is confirmed or completed
+        const monthlyRevenue = bookings.filter(booking => booking.status === 'confirmed' || booking.status === 'completed').reduce((acc, booking)=> acc + (booking.price || 0), 0)
 
         // Fetch recent feedbacks for dashboard
         const recentFeedbacks = await Feedback.find({}).populate('user', 'name email image').sort({createdAt: -1}).limit(5);
