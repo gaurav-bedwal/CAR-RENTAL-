@@ -4,7 +4,7 @@ import toast from 'react-hot-toast'
 import { assets } from '../assets/assets'
 
 const Profile = () => {
-    const { user: userData, setUser: setUserData, axios, setToken, navigate } = useAppContext()
+    const { user: userData, setUser: setUserData, token, setToken, setIsAdmin, axios, navigate } = useAppContext()
     const [isEditing, setIsEditing] = useState(false)
     const [loading, setLoading] = useState(false)
     
@@ -92,8 +92,11 @@ const Profile = () => {
                 const { data } = await axios.delete('/api/user/delete-account')
                 if (data.success) {
                     toast.success(data.message)
-                    setToken('')
+                    setToken(null)
+                    setUserData(null)
+                    setIsAdmin(false)
                     localStorage.removeItem('token')
+                    axios.defaults.headers.common['Authorization'] = ''
                     navigate('/')
                 } else {
                     toast.error(data.message)
