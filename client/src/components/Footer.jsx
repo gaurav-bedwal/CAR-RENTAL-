@@ -1,6 +1,7 @@
 import React from 'react'
 import { assets } from '../assets/assets'
 import { motion } from 'motion/react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
     return (
@@ -61,10 +62,10 @@ const Footer = () => {
                     <div>
                         <h2 className='text-base font-semibold text-white tracking-widest uppercase mb-4'>Quick Links</h2>
                         <ul className='flex flex-col gap-3'>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Home</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Browse Cars</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">List Your Car</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">About Us</a></li>
+                            <li><Link to="/" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Home</Link></li>
+                            <li><Link to="/cars" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Browse Cars</Link></li>
+                            <li><Link to="/request-listing" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">List Your Car</Link></li>
+                            <li><Link to="/about-us" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">About Us</Link></li>
                         </ul>
                     </div>
 

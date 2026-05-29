@@ -16,8 +16,9 @@ import RevenueFilter from './pages/owner/RevenueFilter'
 import Login from './components/Login'
 import Chatbot from './components/Chatbot'
 import FeedbackPopup from './components/FeedbackPopup'
-import ProvideFeedback from './pages/ProvideFeedback'
 import Profile from './pages/Profile'
+import AboutUs from './pages/AboutUs'
+import ProvideFeedback from './pages/ProvideFeedback'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
 import Loader from './components/Loader'
@@ -57,8 +58,9 @@ const App = () => {
       <Route path='/car-details/:id' element={<CarDetails/>}/>
       <Route path='/cars' element={<Cars/>}/>
       <Route path='/my-bookings' element={<MyBookings/>}/>
-      <Route path='/feedback' element={<ProvideFeedback/>}/>
       <Route path='/profile' element={<Profile/>}/>
+      <Route path='/about-us' element={<AboutUs/>}/>
+      <Route path='/feedback' element={<ProvideFeedback/>}/>
       <Route path='/request-listing' element={<div className="bg-[#0a0a0a] min-h-screen pt-20"><div className="max-w-7xl mx-auto"><AddCar /></div></div>}/>
       <Route path='/owner' element={<Layout />}>
         <Route index element={<Dashboard />}/>
