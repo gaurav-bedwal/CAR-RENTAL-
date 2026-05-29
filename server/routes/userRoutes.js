@@ -1,5 +1,5 @@
 import express from "express";
-import { getCars, getPublicFeedback, getSecurityQuestion, getUserData, loginUser, registerUser, resetPassword, submitFeedback, skipFeedback, updateProfile, deleteAccount, changePassword } from "../controllers/userController.js";
+import { getCars, getPublicFeedback, getSecurityQuestion, getUserData, loginUser, registerUser, resetPassword, submitFeedback, skipFeedback, updateProfile, deleteAccount, changePassword, sendOtp } from "../controllers/userController.js";
 import { processChatMessage } from "../controllers/chatController.js";
 import { protect } from "../middleware/auth.js";
 import upload from "../middleware/multer.js";
@@ -7,6 +7,7 @@ import upload from "../middleware/multer.js";
 const userRouter = express.Router();
 
 userRouter.post('/register', registerUser)
+userRouter.post('/send-otp', sendOtp)
 userRouter.post('/login', loginUser)
 userRouter.post('/security-question', getSecurityQuestion)
 userRouter.post('/reset-password', resetPassword)

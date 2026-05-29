@@ -18,6 +18,41 @@ const Login = () => {
     const [drivingLicense, setDrivingLicense] = React.useState("");
     const [fetchedQuestion, setFetchedQuestion] = React.useState(""); // Displayed during reset
 
+    // OTP states
+    const [otp, setOtp] = React.useState("");
+    const [otpSent, setOtpSent] = React.useState(false);
+    const [isSendingOtp, setIsSendingOtp] = React.useState(false);
+
+    const changeState = (newState) => {
+        setState(newState);
+        setOtp("");
+        setOtpSent(false);
+    };
+
+    const sendOtpHandler = async () => {
+        if (!email) {
+            return toast.error("Please enter email address first");
+        }
+        setIsSendingOtp(true);
+        const toastId = toast.loading("Sending verification code...");
+        try {
+            const { data } = await axios.post('/api/user/send-otp', { email });
+            toast.dismiss(toastId);
+            if (data.success) {
+                toast.success(data.message);
+                setOtpSent(true);
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.dismiss(toastId);
+            const errorMsg = error.response?.data?.message || error.message || "Failed to send verification code";
+            toast.error(errorMsg);
+        } finally {
+            setIsSendingOtp(false);
+        }
+    };
+
     const onSubmitHandler = async (event) => {
         try {
             event.preventDefault();
@@ -25,27 +60,34 @@ const Login = () => {
             if (state === 'login' || state === 'register') {
                 const payload = { name, email, password };
                 if (state === 'register') {
+                    if (!otpSent) {
+                        return toast.error("Please request and enter the verification code (OTP) sent to your email.");
+                    }
+                    if (!otp) {
+                        return toast.error("Please enter the verification code");
+                    }
                     payload.securityQuestion = securityQuestion;
                     payload.securityAnswer = securityAnswer;
                     payload.mobile = mobile;
                     payload.drivingLicense = drivingLicense;
+                    payload.otp = otp;
                 }
                 
                 const { data } = await axios.post(`/api/user/${state}`, payload)
-
+ 
                 if (data.success) {
                     navigate('/')
                     setToken(data.token)
                     setShowLogin(false)
                 } else {
-                    toast.error(data.message || "Login failed")
+                    toast.error(data.message || "Registration/Login failed")
                 }
             } 
             else if (state === 'forgot_email') {
                 const { data } = await axios.post('/api/user/security-question', { email })
                 if (data.success) {
                     setFetchedQuestion(data.securityQuestion)
-                    setState('forgot_reset')
+                    changeState('forgot_reset')
                 } else {
                     toast.error(data.message)
                 }
@@ -54,19 +96,19 @@ const Login = () => {
                  const { data } = await axios.post('/api/user/reset-password', { email, securityAnswer, newPassword: password })
                  if (data.success) {
                      toast.success(data.message)
-                     setState('login')
+                     changeState('login')
                      setPassword('')
                      setSecurityAnswer('')
                  } else {
                      toast.error(data.message)
                  }
             }
-
+ 
         } catch (error) {
             const errorMsg = error.response?.data?.message || error.message || "An unexpected error occurred";
             toast.error(errorMsg)
         }
-
+ 
     }
 
     return (
@@ -91,8 +133,42 @@ const Login = () => {
                 {(state === "login" || state === "register" || state === "forgot_email") && (
                    <div className="w-full">
                        <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2">Email Address</p>
-                       <input onChange={(e) => setEmail(e.target.value)} value={email} placeholder="client@example.com" className="border border-white/10 bg-[#0a0a0a] text-white rounded-xl w-full p-3.5 outline-none focus:border-primary/50 transition-colors placeholder-gray-600" type="email" required />
+                       <div className="relative flex items-center">
+                           <input 
+                               onChange={(e) => setEmail(e.target.value)} 
+                               value={email} 
+                               placeholder="client@example.com" 
+                               className={`border border-white/10 bg-[#0a0a0a] text-white rounded-xl w-full p-3.5 ${state === "register" ? "pr-28" : ""} outline-none focus:border-primary/50 transition-colors placeholder-gray-600`} 
+                               type="email" 
+                               required 
+                           />
+                           {state === "register" && (
+                               <button 
+                                   type="button"
+                                   disabled={isSendingOtp || !email}
+                                   onClick={sendOtpHandler}
+                                   className="absolute right-2 px-3 py-2 bg-primary hover:bg-primary-dull disabled:bg-gray-800 disabled:text-gray-600 disabled:cursor-not-allowed transition-all text-[#0a0a0a] font-bold text-[10px] uppercase tracking-wider rounded-lg cursor-pointer select-none"
+                               >
+                                   {isSendingOtp ? "Sending..." : otpSent ? "Resend" : "Send OTP"}
+                               </button>
+                           )}
+                       </div>
                    </div>
+                )}
+
+                {state === "register" && otpSent && (
+                    <div className="w-full">
+                        <p className="text-xs uppercase tracking-widest text-primary font-bold mb-2">Verification Code (OTP)</p>
+                        <input 
+                            onChange={(e) => setOtp(e.target.value)} 
+                            value={otp} 
+                            placeholder="Enter 6-digit OTP" 
+                            className="border border-primary/40 bg-[#0a0a0a] text-white rounded-xl w-full p-3.5 outline-none focus:border-primary text-center font-mono text-lg tracking-[0.4em] placeholder:tracking-normal placeholder-gray-600" 
+                            type="text" 
+                            maxLength={6}
+                            required 
+                        />
+                    </div>
                 )}
                 
                 {state === "register" && (
@@ -144,15 +220,15 @@ const Login = () => {
                 <div className="w-full flex flex-col items-center gap-3 text-gray-400 mt-2">
                    {state === "login" && (
                        <>
-                           <p>New to RentLux? <span onClick={() => setState("register")} className="text-primary hover:text-white transition-colors cursor-pointer font-semibold underline underline-offset-4 ml-1">Create account</span></p>
-                           <p><span onClick={() => setState("forgot_email")} className="text-gray-500 hover:text-white transition-colors cursor-pointer text-xs uppercase tracking-wider">Forgot Password?</span></p>
+                           <p>New to RentLux? <span onClick={() => changeState("register")} className="text-primary hover:text-white transition-colors cursor-pointer font-semibold underline underline-offset-4 ml-1">Create account</span></p>
+                           <p><span onClick={() => changeState("forgot_email")} className="text-gray-500 hover:text-white transition-colors cursor-pointer text-xs uppercase tracking-wider">Forgot Password?</span></p>
                        </>
                    )}
                    {state === "register" && (
-                       <p>Already a client? <span onClick={() => setState("login")} className="text-primary hover:text-white transition-colors cursor-pointer font-semibold underline underline-offset-4 ml-1">Login here</span></p>
+                       <p>Already a client? <span onClick={() => changeState("login")} className="text-primary hover:text-white transition-colors cursor-pointer font-semibold underline underline-offset-4 ml-1">Login here</span></p>
                    )}
                    {(state === "forgot_email" || state === "forgot_reset") && (
-                       <p><span onClick={() => setState("login")} className="text-gray-500 hover:text-white transition-colors cursor-pointer text-xs uppercase tracking-wider border-b border-gray-600 pb-1">Back to Login</span></p>
+                       <p><span onClick={() => changeState("login")} className="text-gray-500 hover:text-white transition-colors cursor-pointer text-xs uppercase tracking-wider border-b border-gray-600 pb-1">Back to Login</span></p>
                    )}
                 </div>
 

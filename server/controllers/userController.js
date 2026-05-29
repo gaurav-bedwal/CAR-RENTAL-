@@ -6,6 +6,8 @@ import Feedback from "../models/Feedback.js";
 import Booking from "../models/Booking.js";
 import imagekit from "../configs/imageKit.js";
 import fs from "fs";
+import Otp from "../models/Otp.js";
+import sendEmail from "../configs/nodemailer.js";
 
 
 // Generate JWT Token
@@ -18,16 +20,25 @@ const generateToken = (userId, sessionId)=>{
 // Register User
 export const registerUser = async (req, res)=>{
     try {
-        const {name, email, password, securityQuestion, securityAnswer, mobile, drivingLicense} = req.body
+        const {name, email, password, securityQuestion, securityAnswer, mobile, drivingLicense, otp} = req.body
 
-        if(!name || !email || !password || !mobile || !drivingLicense || password.length < 8){
-            return res.json({success: false, message: 'Fill all the mandatory fields'})
+        if(!name || !email || !password || !mobile || !drivingLicense || !otp || password.length < 8){
+            return res.json({success: false, message: 'Fill all the mandatory fields (including OTP)'})
         }
 
         const userExists = await User.findOne({email})
         if(userExists){
             return res.json({success: false, message: 'User already exists'})
         }
+
+        // Validate OTP
+        const otpRecord = await Otp.findOne({ email });
+        if (!otpRecord || otpRecord.otp !== otp) {
+            return res.json({ success: false, message: 'Invalid or expired OTP' });
+        }
+
+        // Delete used OTP
+        await Otp.deleteOne({ email });
 
         const hashedPassword = await bcrypt.hash(password, 10)
         let processedAnswer = securityAnswer ? securityAnswer.toLowerCase().trim() : '';
@@ -51,6 +62,79 @@ export const registerUser = async (req, res)=>{
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
+    }
+}
+
+// Send OTP
+export const sendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.json({ success: false, message: "Email is required" });
+        }
+
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.json({ success: false, message: "User already exists" });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Save OTP to DB (upsert)
+        await Otp.findOneAndUpdate(
+            { email },
+            { otp, createdAt: new Date() },
+            { upsert: true, new: true }
+        );
+
+        // Send Email
+        const emailSubject = "Verify Your RentLux Account - OTP Verification";
+        const emailText = `Your OTP for registering with RentLux is: ${otp}. This OTP is valid for 5 minutes.`;
+        const emailHtml = `
+            <div style="background-color: #0b0d17; color: #d1d5db; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; text-align: center; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); max-width: 600px; margin: 0 auto;">
+                <div style="margin-bottom: 20px;">
+                    <span style="font-size: 32px; font-weight: bold; letter-spacing: 2px; color: #fff;">
+                        <span style="color: #d4af37; font-style: italic;">Rent</span>Lux
+                    </span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid rgba(212, 175, 55, 0.2); margin: 20px 0;" />
+                <h2 style="color: #fff; font-size: 24px; font-weight: bold; margin-bottom: 10px;">Verification Code</h2>
+                <p style="font-size: 15px; line-height: 1.6; color: #9ca3af; margin-bottom: 30px;">
+                    Thank you for choosing RentLux. Use the following security code to complete your client registration. This code is valid for <strong style="color: #fff;">5 minutes</strong>.
+                </p>
+                <div style="background-color: #141824; border: 1px solid #d4af37; border-radius: 16px; padding: 20px; display: inline-block; margin-bottom: 30px;">
+                    <span style="font-size: 38px; font-weight: 900; letter-spacing: 8px; color: #d4af37; font-family: monospace; display: block; padding-left: 8px;">${otp}</span>
+                </div>
+                <p style="font-size: 12px; color: #6b7280; line-height: 1.5;">
+                    If you did not request this verification code, please ignore this email or contact support.
+                </p>
+                <hr style="border: 0; border-top: 1px solid rgba(255, 255, 255, 0.05); margin: 30px 0 20px 0;" />
+                <p style="font-size: 11px; color: #4b5563; text-transform: uppercase; tracking-spacing: 1px;">
+                    &copy; 2026 RentLux. All Rights Reserved.
+                </p>
+            </div>
+        `;
+
+        const result = await sendEmail({
+            to: email,
+            subject: emailSubject,
+            text: emailText,
+            html: emailHtml
+        });
+
+        if (result.devMode) {
+            return res.json({ 
+                success: true, 
+                message: `[DEV MODE] OTP: ${otp} (logged to backend console)` 
+            });
+        }
+
+        res.json({ success: true, message: "OTP sent to your email successfully" });
+
+    } catch (error) {
+        console.error("Error in sendOtp:", error.message);
+        res.json({ success: false, message: error.message });
     }
 }
 
