@@ -23,7 +23,7 @@ const knowledgeBase = [
     },
     {
         keywords: ["location", "where", "city", "place", "pickup"],
-        answer: "We are currently operating in major hubs including New York, Los Angeles, Chicago, and Houston. You can select your preferred location during the booking process."
+        answer: "We are currently operating in major hubs including Nathupur, Rai, Sonipat, and Murthal. You can select your preferred location during the booking process."
     },
     {
         keywords: ["security", "safe", "login", "session"],
