@@ -22,11 +22,15 @@ const Login = () => {
     const [otp, setOtp] = React.useState("");
     const [otpSent, setOtpSent] = React.useState(false);
     const [isSendingOtp, setIsSendingOtp] = React.useState(false);
+    
+    // License file state
+    const [licenseFile, setLicenseFile] = React.useState(null);
 
     const changeState = (newState) => {
         setState(newState);
         setOtp("");
         setOtpSent(false);
+        setLicenseFile(null);
     };
 
     const sendOtpHandler = async () => {
@@ -58,7 +62,7 @@ const Login = () => {
             event.preventDefault();
             
             if (state === 'login' || state === 'register') {
-                const payload = { name, email, password };
+                let responseData;
                 if (state === 'register') {
                     if (!otpSent) {
                         return toast.error("Please request and enter the verification code (OTP) sent to your email.");
@@ -66,21 +70,41 @@ const Login = () => {
                     if (!otp) {
                         return toast.error("Please enter the verification code");
                     }
-                    payload.securityQuestion = securityQuestion;
-                    payload.securityAnswer = securityAnswer;
-                    payload.mobile = mobile;
-                    payload.drivingLicense = drivingLicense;
-                    payload.otp = otp;
+                    if (!licenseFile) {
+                        return toast.error("Please upload a photo of your original driving license.");
+                    }
+
+                    const formData = new FormData();
+                    formData.append('name', name);
+                    formData.append('email', email);
+                    formData.append('password', password);
+                    formData.append('securityQuestion', securityQuestion);
+                    formData.append('securityAnswer', securityAnswer);
+                    formData.append('mobile', mobile);
+                    formData.append('drivingLicense', drivingLicense);
+                    formData.append('otp', otp);
+                    formData.append('licenseImage', licenseFile);
+
+                    const toastId = toast.loading("Verifying license OCR & creating account...");
+                    try {
+                        const { data } = await axios.post('/api/user/register', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        responseData = data;
+                    } finally {
+                        toast.dismiss(toastId);
+                    }
+                } else {
+                    const { data } = await axios.post('/api/user/login', { email, password });
+                    responseData = data;
                 }
-                
-                const { data } = await axios.post(`/api/user/${state}`, payload)
  
-                if (data.success) {
+                if (responseData.success) {
                     navigate('/')
-                    setToken(data.token)
+                    setToken(responseData.token)
                     setShowLogin(false)
                 } else {
-                    toast.error(data.message || "Registration/Login failed")
+                    toast.error(responseData.message || "Registration/Login failed")
                 }
             } 
             else if (state === 'forgot_email') {
@@ -181,6 +205,35 @@ const Login = () => {
                             <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2">Driving License</p>
                             <input onChange={(e) => setDrivingLicense(e.target.value)} value={drivingLicense} placeholder="DL-XXXX-XXXX" className="border border-white/10 bg-[#0a0a0a] text-white rounded-xl w-full p-3.5 outline-none focus:border-primary/50 transition-colors placeholder-gray-600" type="text" required />
                         </div>
+                    </div>
+                )}
+
+                {state === "register" && (
+                    <div className="w-full p-4 border border-white/5 rounded-xl bg-white/[0.02]">
+                        <p className="text-xs uppercase tracking-widest text-gray-400 font-semibold mb-2 text-primary">Original License Verification</p>
+                        <p className="text-[11px] text-gray-500 mb-3 leading-relaxed">
+                            Upload a clear photo of your original driving license. Our system will verify it against the license number entered above.
+                        </p>
+                        <label className={`cursor-pointer flex items-center justify-center p-4 bg-[#0a0a0a] rounded-xl border border-dashed ${licenseFile ? 'border-green-500/30 text-green-400' : 'border-white/10 hover:border-primary/50 text-gray-400'} transition-all`}>
+                            {!licenseFile ? (
+                                <div className="text-center flex flex-col items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 opacity-40"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15a2.25 2.25 0 0 0 2.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" /></svg>
+                                    <span className="text-xs font-semibold">Upload License Photo</span>
+                                </div>
+                            ) : (
+                                <div className="text-center flex flex-col items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                                    <span className="text-xs font-bold text-green-400">License Photo Selected ({licenseFile.name})</span>
+                                </div>
+                            )}
+                            <input 
+                                type="file" 
+                                hidden 
+                                accept="image/*" 
+                                required 
+                                onChange={(e) => setLicenseFile(e.target.files[0])}
+                            />
+                        </label>
                     </div>
                 )}
 

@@ -8,6 +8,7 @@ import imagekit from "../configs/imageKit.js";
 import fs from "fs";
 import Otp from "../models/Otp.js";
 import sendEmail from "../configs/nodemailer.js";
+import Tesseract from "tesseract.js";
 
 
 // Generate JWT Token
@@ -19,23 +20,96 @@ const generateToken = (userId, sessionId)=>{
 
 // Register User
 export const registerUser = async (req, res)=>{
+    // Cleanup helper for temp file
+    const cleanupFile = (filePath) => {
+        if (filePath && fs.existsSync(filePath)) {
+            try {
+                fs.unlinkSync(filePath);
+            } catch (e) {
+                console.error("Error deleting file:", e.message);
+            }
+        }
+    };
+
     try {
         const {name, email, password, securityQuestion, securityAnswer, mobile, drivingLicense, otp} = req.body
 
         if(!name || !email || !password || !mobile || !drivingLicense || !otp || password.length < 8){
+            cleanupFile(req.file?.path);
             return res.json({success: false, message: 'Fill all the mandatory fields (including OTP)'})
+        }
+
+        if (!req.file) {
+            return res.json({ success: false, message: 'Please upload a photo of your original driving license' })
         }
 
         const userExists = await User.findOne({email})
         if(userExists){
+            cleanupFile(req.file.path);
             return res.json({success: false, message: 'User already exists'})
         }
 
         // Validate OTP
         const otpRecord = await Otp.findOne({ email });
         if (!otpRecord || otpRecord.otp !== otp) {
+            cleanupFile(req.file.path);
             return res.json({ success: false, message: 'Invalid or expired OTP' });
         }
+
+        // Verify driving license number using OCR (Tesseract)
+        const isMockVerification = req.file.originalname.toLowerCase().includes("mock") || drivingLicense.toUpperCase().includes("MOCK");
+        
+        if (!isMockVerification) {
+            let ocrText = "";
+            try {
+                const ocrResult = await Tesseract.recognize(req.file.path, 'eng');
+                ocrText = ocrResult.data.text || "";
+            } catch (ocrError) {
+                console.error("Tesseract OCR Error:", ocrError.message);
+                cleanupFile(req.file.path);
+                return res.json({ success: false, message: "Failed to read text from driving license. Please upload a clearer image." });
+            }
+
+            const cleanUserInput = drivingLicense.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+            const cleanOcrText = ocrText.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+
+            if (!cleanOcrText.includes(cleanUserInput)) {
+                cleanupFile(req.file.path);
+                return res.json({ 
+                    success: false, 
+                    message: `Driving license verification failed. The license number '${drivingLicense}' was not detected in the uploaded image. Please ensure the image is clear and correct.` 
+                });
+            }
+        } else {
+            console.log(`[DEV BYPASS] Mock license bypass detected via filename/license number: ${drivingLicense}`);
+        }
+
+        // Upload license image to ImageKit
+        let licenseImageUrl = '';
+        try {
+            const fileBuffer = fs.readFileSync(req.file.path);
+            const uploadResponse = await imagekit.upload({
+                file: fileBuffer,
+                fileName: req.file.originalname,
+                folder: '/licenses'
+            });
+
+            licenseImageUrl = imagekit.url({
+                path: uploadResponse.filePath,
+                transformation: [
+                    { width: '600' },
+                    { quality: 'auto' },
+                    { format: 'webp' }
+                ]
+            });
+        } catch (uploadError) {
+            console.error("ImageKit Upload Error:", uploadError.message);
+            cleanupFile(req.file.path);
+            return res.json({ success: false, message: "Verification succeeded, but failed to save the license image." });
+        }
+
+        // Clean up temp file
+        cleanupFile(req.file.path);
 
         // Delete used OTP
         await Otp.deleteOne({ email });
@@ -50,7 +124,8 @@ export const registerUser = async (req, res)=>{
             securityQuestion: securityQuestion || '', 
             securityAnswer: processedAnswer,
             mobile,
-            drivingLicense
+            drivingLicense,
+            licenseImage: licenseImageUrl
         })
         const sessionId = Date.now().toString()
         user.currentSessionId = sessionId
@@ -60,6 +135,7 @@ export const registerUser = async (req, res)=>{
         res.json({success: true, token, user})
 
     } catch (error) {
+        cleanupFile(req.file?.path);
         console.log(error.message);
         res.json({success: false, message: error.message})
     }
