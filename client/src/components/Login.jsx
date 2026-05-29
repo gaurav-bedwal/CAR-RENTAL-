@@ -3,6 +3,138 @@ import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import Tesseract from 'tesseract.js';
 
+const verifyLicenseOCR = async (file, dlNum, userName, workerInstance) => {
+    // Clean user inputs
+    const cleanDlNum = dlNum.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    const cleanNameWords = userName.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+    if (!cleanDlNum) throw new Error("Invalid driving license number format");
+    if (cleanNameWords.length === 0) throw new Error("Invalid name format");
+
+    const months = {
+        jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+        jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+
+    // Load image helper
+    const loadImage = (src) => {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error("Failed to load image"));
+            img.src = src;
+        });
+    };
+
+    const objectUrl = URL.createObjectURL(file);
+    let img;
+    try {
+        img = await loadImage(objectUrl);
+    } finally {
+        URL.revokeObjectURL(objectUrl);
+    }
+
+    // Try orientations: 0 (original), 270 (counter-clockwise 90°), 90 (clockwise 90°)
+    const angles = [0, 270, 90];
+    let lastErrorMsg = "";
+
+    for (const angle of angles) {
+        console.log(`Trying OCR with rotation angle: ${angle}°`);
+        
+        // Create rotated canvas
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (angle === 90 || angle === 270) {
+            canvas.width = img.height;
+            canvas.height = img.width;
+        } else {
+            canvas.width = img.width;
+            canvas.height = img.height;
+        }
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((angle * Math.PI) / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+        // Run OCR
+        const ocrResult = await workerInstance.recognize(canvas);
+        const ocrText = ocrResult.data.text || "";
+        const cleanOcrText = ocrText.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+        
+        // 1. Match DL Number
+        if (!cleanOcrText.includes(cleanDlNum)) {
+            lastErrorMsg = `Driving license number '${dlNum}' was not detected in the image.`;
+            continue;
+        }
+
+        // 2. Match Name (check if all words in name are present in OCR text)
+        const ocrTextLower = ocrText.toLowerCase();
+        const nameMatched = cleanNameWords.every(word => ocrTextLower.includes(word));
+        if (!nameMatched) {
+            lastErrorMsg = `The name '${userName}' was not detected in the driving license image.`;
+            continue;
+        }
+
+        // 3. Match Validity Date
+        const dateRegexes = [
+            /\b(\d{1,2})[-/\s]+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[-/\s]+(\d{4})\b/gi,
+            /\b(\d{1,2})[-/\s]+(\d{1,2})[-/\s]+(\d{4})\b/g
+        ];
+
+        let parsedDates = [];
+
+        for (const regex of dateRegexes) {
+            let match;
+            while ((match = regex.exec(ocrText)) !== null) {
+                const day = parseInt(match[1], 10);
+                const year = parseInt(match[3], 10);
+                let month;
+                if (isNaN(match[2])) {
+                    const mName = match[2].toLowerCase().substring(0, 3);
+                    month = months[mName];
+                } else {
+                    month = parseInt(match[2], 10) - 1;
+                }
+                if (month !== undefined && month >= 0 && month < 12) {
+                    const parsedDate = new Date(year, month, day);
+                    parsedDates.push(parsedDate);
+                }
+            }
+        }
+
+        // Validity date is the one in the future (DOB and Issue Date are in the past)
+        const currentDate = new Date();
+        let foundValidityDate = parsedDates.find(d => d > currentDate);
+
+        // Fallback: If no future date is found, check if there's a date near the word "validity"
+        if (!foundValidityDate && parsedDates.length > 0) {
+            const validityIndex = ocrTextLower.indexOf("validity");
+            if (validityIndex !== -1) {
+                parsedDates.sort((a, b) => b - a); // descending
+                foundValidityDate = parsedDates[0];
+            }
+        }
+
+        if (!foundValidityDate) {
+            lastErrorMsg = "Could not verify the validity date on your driving license. Ensure the expiry date is clearly visible.";
+            continue;
+        }
+
+        // Check if expired
+        if (foundValidityDate < currentDate) {
+            throw new Error(`Your driving license has expired (Valid until: ${foundValidityDate.toLocaleDateString()}).`);
+        }
+
+        console.log(`OCR Verification successful at ${angle}° rotation! Validity Date: ${foundValidityDate.toLocaleDateString()}`);
+        return {
+            success: true,
+            validityDate: foundValidityDate
+        };
+    }
+
+    throw new Error(lastErrorMsg || "Verification failed. Please ensure the image is clear and contains the correct details.");
+};
+
 const Login = () => {
 
     const { setShowLogin, axios, setToken, navigate } = useAppContext()
@@ -113,37 +245,26 @@ const Login = () => {
                     const isMockVerification = licenseFile.name.toLowerCase().includes("mock") || drivingLicense.toUpperCase().includes("MOCK");
                     
                     if (!isMockVerification) {
-                        const ocrToastId = toast.loading("Scanning driving license image (OCR)...");
-                        let ocrText = "";
+                        let workerInstance = ocrWorker;
+                        let createdTempWorker = false;
+                        if (!workerInstance) {
+                            workerInstance = await Tesseract.createWorker("eng");
+                            createdTempWorker = true;
+                        }
+
+                        const ocrToastId = toast.loading("Verifying license details (OCR)...");
                         try {
-                            let workerInstance = ocrWorker;
-                            if (!workerInstance) {
-                                // Fallback: Initialize worker on the fly if preloading wasn't complete
-                                workerInstance = await Tesseract.createWorker("eng");
-                            }
-                            const ocrResult = await workerInstance.recognize(licenseFile);
-                            ocrText = ocrResult.data.text || "";
-                            
-                            // Only terminate if we created a temporary fallback instance
-                            if (!ocrWorker) {
-                                await workerInstance.terminate();
-                            }
+                            const verificationResult = await verifyLicenseOCR(licenseFile, drivingLicense, name, workerInstance);
+                            toast.success(`License verified! Expires on: ${verificationResult.validityDate.toLocaleDateString()}`);
                         } catch (ocrError) {
-                            console.error("Tesseract Client-Side OCR Error:", ocrError.message);
-                            toast.dismiss(ocrToastId);
-                            return toast.error("Failed to read text from the driving license image. Please ensure it is a clear image.");
+                            console.error("License Verification Error:", ocrError.message);
+                            return toast.error(ocrError.message || "Failed to verify driving license. Ensure the image is clear.");
                         } finally {
                             toast.dismiss(ocrToastId);
+                            if (createdTempWorker) {
+                                await workerInstance.terminate();
+                            }
                         }
-
-                        const cleanUserInput = drivingLicense.replace(/[^A-Z0-9]/gi, "").toUpperCase();
-                        const cleanOcrText = ocrText.replace(/[^A-Z0-9]/gi, "").toUpperCase();
-
-                        if (!cleanOcrText.includes(cleanUserInput)) {
-                            return toast.error(`Driving license verification failed. The license number '${drivingLicense}' was not detected in the uploaded image. Please ensure the image is clear and the number matches exactly.`);
-                        }
-                        
-                        toast.success("Driving license number verified!");
                     } else {
                         console.log(`[DEV BYPASS] Mock license bypass detected: ${drivingLicense}`);
                     }
