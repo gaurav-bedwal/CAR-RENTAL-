@@ -26,6 +26,10 @@ export const AppProvider = ({ children })=>{
     const [user, setUser] = useState(null)
     const [isAdmin, setIsAdmin] = useState(false)
     const [showLogin, setShowLogin] = useState(false)
+    const [userLoading, setUserLoading] = useState(() => {
+        const storedToken = localStorage.getItem('token')
+        return !!storedToken
+    })
     const [pickupDate, setPickupDate] = useState('')
     const [returnDate, setReturnDate] = useState('')
     const [searchQuery, setSearchQuery] = useState('')
@@ -54,8 +58,17 @@ export const AppProvider = ({ children })=>{
             if (error.response?.status === 503 || errorMsg.toLowerCase().includes('database')) {
                 setIsDbConnected(false)
                 setDbMessage(errorMsg)
+            } else if (error.response?.status === 401 || error.response?.status === 403) {
+                setToken(null)
+                localStorage.removeItem('token')
+                axios.defaults.headers.common['Authorization'] = ''
+                toast.error("Session expired. Please log in again.")
+                navigate('/')
+            } else {
+                toast.error(errorMsg)
             }
-            toast.error(errorMsg)
+        } finally {
+            setUserLoading(false)
         }
     }
     // Function to fetch all cars from the server
@@ -103,6 +116,7 @@ export const AppProvider = ({ children })=>{
         } else {
             localStorage.removeItem('token')
             axios.defaults.headers.common['Authorization'] = ''
+            setUserLoading(false)
         }
     },[token])
 
@@ -110,7 +124,8 @@ export const AppProvider = ({ children })=>{
         navigate, currency, axios, user, setUser,
         token, setToken, isAdmin, setIsAdmin, fetchUser, showLogin, setShowLogin, logout, fetchCars, cars, setCars, 
         pickupDate, setPickupDate, returnDate, setReturnDate, assets,
-        isDbConnected, dbMessage, searchQuery, setSearchQuery
+        isDbConnected, dbMessage, searchQuery, setSearchQuery,
+        userLoading
     }
 
     return (

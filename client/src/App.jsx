@@ -20,11 +20,20 @@ import ProvideFeedback from './pages/ProvideFeedback'
 import Profile from './pages/Profile'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
+import Loader from './components/Loader'
 
 const App = () => {
 
-  const {showLogin, isDbConnected, dbMessage, isAdmin} = useAppContext()
+  const {showLogin, isDbConnected, dbMessage, isAdmin, userLoading} = useAppContext()
   const isOwnerPath = useLocation().pathname.startsWith('/owner')
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <Loader />
+      </div>
+    )
+  }
 
   return (
     <div className='min-h-screen relative'>
