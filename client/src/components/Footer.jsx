@@ -81,10 +81,10 @@ const Footer = () => {
                     <div>
                         <h2 className='text-base font-semibold text-white tracking-widest uppercase mb-4'>Contact</h2>
                         <ul className='flex flex-col gap-3 text-gray-500'>
-                            <li>1234 Luxury Drive</li>
-                            <li>San Francisco, CA 94107</li>
-                            <li>+1 234 567890</li>
-                            <li>info@example.com</li>
+                            <li>NATHUPUR, SONIPAT</li>
+                            <li>Sonipat, Haryana, 131029</li>
+                            <li>7988269193</li>
+                            <li>sumittravel1122@gmail.com</li>
                         </ul>
                     </div>
 
