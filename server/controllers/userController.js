@@ -123,14 +123,7 @@ export const sendOtp = async (req, res) => {
             html: emailHtml
         });
 
-        if (result.devMode) {
-            return res.json({ 
-                success: true, 
-                message: `[DEV MODE] OTP: ${otp} (logged to backend console)` 
-            });
-        }
-
-        res.json({ success: true, message: "OTP sent to your email successfully" });
+        res.json({ success: true, message: "Verification code sent to your email successfully" });
 
     } catch (error) {
         console.error("Error in sendOtp:", error.message);
