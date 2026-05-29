@@ -72,10 +72,10 @@ const Footer = () => {
                     <div>
                         <h2 className='text-base font-semibold text-white tracking-widest uppercase mb-4'>Resources</h2>
                         <ul className='flex flex-col gap-3'>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Help Center</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Terms of Service</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Privacy Policy</a></li>
-                            <li><a href="#" className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Insurance</a></li>
+                            <li><Link to="/help-center" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Help Center</Link></li>
+                            <li><Link to="/terms" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Terms of Service</Link></li>
+                            <li><Link to="/privacy" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Privacy Policy</Link></li>
+                            <li><Link to="/insurance" onClick={() => window.scrollTo(0,0)} className="hover:text-primary transition-colors text-gray-500 hover:tracking-wide duration-300">Insurance</Link></li>
                         </ul>
                     </div>
 

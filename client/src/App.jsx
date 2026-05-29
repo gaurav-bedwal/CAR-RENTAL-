@@ -18,6 +18,10 @@ import Chatbot from './components/Chatbot'
 import FeedbackPopup from './components/FeedbackPopup'
 import Profile from './pages/Profile'
 import AboutUs from './pages/AboutUs'
+import HelpCenter from './pages/HelpCenter'
+import TermsOfService from './pages/TermsOfService'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import Insurance from './pages/Insurance'
 import ProvideFeedback from './pages/ProvideFeedback'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
@@ -60,6 +64,10 @@ const App = () => {
       <Route path='/my-bookings' element={<MyBookings/>}/>
       <Route path='/profile' element={<Profile/>}/>
       <Route path='/about-us' element={<AboutUs/>}/>
+      <Route path='/help-center' element={<HelpCenter/>}/>
+      <Route path='/terms' element={<TermsOfService/>}/>
+      <Route path='/privacy' element={<PrivacyPolicy/>}/>
+      <Route path='/insurance' element={<Insurance/>}/>
       <Route path='/feedback' element={<ProvideFeedback/>}/>
       <Route path='/request-listing' element={<div className="bg-[#0a0a0a] min-h-screen pt-20"><div className="max-w-7xl mx-auto"><AddCar /></div></div>}/>
       <Route path='/owner' element={<Layout />}>
