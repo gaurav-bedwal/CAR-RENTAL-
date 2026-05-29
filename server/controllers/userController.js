@@ -8,7 +8,6 @@ import imagekit from "../configs/imageKit.js";
 import fs from "fs";
 import Otp from "../models/Otp.js";
 import sendEmail from "../configs/nodemailer.js";
-import Tesseract from "tesseract.js";
 
 
 // Generate JWT Token
@@ -54,34 +53,6 @@ export const registerUser = async (req, res)=>{
         if (!otpRecord || otpRecord.otp !== otp) {
             cleanupFile(req.file.path);
             return res.json({ success: false, message: 'Invalid or expired OTP' });
-        }
-
-        // Verify driving license number using OCR (Tesseract)
-        const isMockVerification = req.file.originalname.toLowerCase().includes("mock") || drivingLicense.toUpperCase().includes("MOCK");
-        
-        if (!isMockVerification) {
-            let ocrText = "";
-            try {
-                const ocrResult = await Tesseract.recognize(req.file.path, 'eng');
-                ocrText = ocrResult.data.text || "";
-            } catch (ocrError) {
-                console.error("Tesseract OCR Error:", ocrError.message);
-                cleanupFile(req.file.path);
-                return res.json({ success: false, message: "Failed to read text from driving license. Please upload a clearer image." });
-            }
-
-            const cleanUserInput = drivingLicense.replace(/[^A-Z0-9]/gi, "").toUpperCase();
-            const cleanOcrText = ocrText.replace(/[^A-Z0-9]/gi, "").toUpperCase();
-
-            if (!cleanOcrText.includes(cleanUserInput)) {
-                cleanupFile(req.file.path);
-                return res.json({ 
-                    success: false, 
-                    message: `Driving license verification failed. The license number '${drivingLicense}' was not detected in the uploaded image. Please ensure the image is clear and correct.` 
-                });
-            }
-        } else {
-            console.log(`[DEV BYPASS] Mock license bypass detected via filename/license number: ${drivingLicense}`);
         }
 
         // Upload license image to ImageKit

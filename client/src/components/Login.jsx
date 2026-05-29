@@ -1,6 +1,7 @@
 import React from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
+import Tesseract from 'tesseract.js';
 
 const Login = () => {
 
@@ -25,6 +26,7 @@ const Login = () => {
     
     // License file state
     const [licenseFile, setLicenseFile] = React.useState(null);
+    const [ocrWorker, setOcrWorker] = React.useState(null);
 
     const changeState = (newState) => {
         setState(newState);
@@ -32,6 +34,39 @@ const Login = () => {
         setOtpSent(false);
         setLicenseFile(null);
     };
+
+    // Pre-initialize Tesseract worker when state is set to "register"
+    React.useEffect(() => {
+        let active = true;
+        if (state === "register" && !ocrWorker) {
+            const initWorker = async () => {
+                try {
+                    const worker = await Tesseract.createWorker("eng");
+                    if (active) {
+                        setOcrWorker(worker);
+                        console.log("Tesseract OCR worker successfully preloaded!");
+                    } else {
+                        await worker.terminate();
+                    }
+                } catch (error) {
+                    console.error("Failed to preload Tesseract worker:", error);
+                }
+            };
+            initWorker();
+        }
+        return () => {
+            active = false;
+        };
+    }, [state, ocrWorker]);
+
+    // Clean up worker on component unmount
+    React.useEffect(() => {
+        return () => {
+            if (ocrWorker) {
+                ocrWorker.terminate().catch(err => console.error("Error terminating Tesseract worker:", err));
+            }
+        };
+    }, [ocrWorker]);
 
     const sendOtpHandler = async () => {
         if (!email) {
@@ -74,6 +109,45 @@ const Login = () => {
                         return toast.error("Please upload a photo of your original driving license.");
                     }
 
+                    // Perform OCR on client side (in user's browser)
+                    const isMockVerification = licenseFile.name.toLowerCase().includes("mock") || drivingLicense.toUpperCase().includes("MOCK");
+                    
+                    if (!isMockVerification) {
+                        const ocrToastId = toast.loading("Scanning driving license image (OCR)...");
+                        let ocrText = "";
+                        try {
+                            let workerInstance = ocrWorker;
+                            if (!workerInstance) {
+                                // Fallback: Initialize worker on the fly if preloading wasn't complete
+                                workerInstance = await Tesseract.createWorker("eng");
+                            }
+                            const ocrResult = await workerInstance.recognize(licenseFile);
+                            ocrText = ocrResult.data.text || "";
+                            
+                            // Only terminate if we created a temporary fallback instance
+                            if (!ocrWorker) {
+                                await workerInstance.terminate();
+                            }
+                        } catch (ocrError) {
+                            console.error("Tesseract Client-Side OCR Error:", ocrError.message);
+                            toast.dismiss(ocrToastId);
+                            return toast.error("Failed to read text from the driving license image. Please ensure it is a clear image.");
+                        } finally {
+                            toast.dismiss(ocrToastId);
+                        }
+
+                        const cleanUserInput = drivingLicense.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+                        const cleanOcrText = ocrText.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+
+                        if (!cleanOcrText.includes(cleanUserInput)) {
+                            return toast.error(`Driving license verification failed. The license number '${drivingLicense}' was not detected in the uploaded image. Please ensure the image is clear and the number matches exactly.`);
+                        }
+                        
+                        toast.success("Driving license number verified!");
+                    } else {
+                        console.log(`[DEV BYPASS] Mock license bypass detected: ${drivingLicense}`);
+                    }
+
                     const formData = new FormData();
                     formData.append('name', name);
                     formData.append('email', email);
@@ -85,7 +159,7 @@ const Login = () => {
                     formData.append('otp', otp);
                     formData.append('licenseImage', licenseFile);
 
-                    const toastId = toast.loading("Verifying license OCR & creating account...");
+                    const toastId = toast.loading("Uploading documents & creating account...");
                     try {
                         const { data } = await axios.post('/api/user/register', formData, {
                             headers: { 'Content-Type': 'multipart/form-data' }
