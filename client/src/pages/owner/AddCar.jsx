@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import Title from '../../components/owner/Title'
 import { assets, cityList } from '../../assets/assets'
 import { useAppContext } from '../../context/AppContext'
@@ -52,6 +53,7 @@ const AddCar = () => {
   }
 
   const [isLoading, setIsLoading] = useState(false)
+  const [agreed, setAgreed] = useState(false)
   
   const onSubmitHandler = async (e)=>{
     e.preventDefault()
@@ -63,6 +65,10 @@ const AddCar = () => {
 
     if (!isAdmin && (!rcFile || !pucFile || !insuranceFile)) {
       return toast.error("Please upload all mandatory documents (RC, PUC, Insurance)")
+    }
+
+    if (!isAdmin && !agreed) {
+      return toast.error("You must agree to the terms and conditions to list your car.")
     }
 
     setIsLoading(true)
@@ -92,6 +98,7 @@ const AddCar = () => {
         setRcFile(null)
         setPucFile(null)
         setInsuranceFile(null)
+        setAgreed(false)
         setCar({
           brand: '',
           model: '',
@@ -403,6 +410,42 @@ const AddCar = () => {
               onChange={e=> setCar({...car, threeSixtyImages: e.target.value})}
             ></textarea>
         </div>
+
+        {!isAdmin && (
+          <div className='flex flex-col gap-6 p-6 rounded-3xl bg-[#141824]/40 border border-amber-500/20 backdrop-blur-sm mt-4 shadow-[0_0_15px_rgba(212,175,55,0.03)]'>
+            <div className='flex items-start gap-4'>
+              <div className='p-3 bg-amber-500/10 rounded-2xl text-primary border border-amber-500/20 shrink-0'>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+              </div>
+              <div className='flex flex-col gap-2'>
+                <h4 className='text-white font-bold text-base'>Important Notice: Listing Terms & Conditions</h4>
+                <p className='text-xs text-gray-400 leading-relaxed'>
+                  Before submitting your vehicle to our marketplace, you must review and agree to our onboarding policies. You are responsible for ensuring that the vehicle is in immaculate condition, holds valid registration and insurance, and complies with our premium safety standards.
+                </p>
+                <p className='text-xs text-gray-500'>
+                  Please review the full <Link to="/terms" target="_blank" className="text-primary hover:underline font-semibold">Terms of Service</Link>, <Link to="/insurance" target="_blank" className="text-primary hover:underline font-semibold">Insurance Details</Link>, and <Link to="/privacy" target="_blank" className="text-primary hover:underline font-semibold">Privacy Policy</Link>.
+                </p>
+              </div>
+            </div>
+
+            <div className='flex items-center gap-3 border-t border-white/5 pt-4'>
+              <label className='flex items-center gap-3 cursor-pointer text-gray-300 select-none w-full'>
+                <input 
+                  type="checkbox" 
+                  checked={agreed} 
+                  onChange={(e) => setAgreed(e.target.checked)} 
+                  required 
+                  className='w-5 h-5 rounded border-white/10 bg-[#0B0D17] text-primary focus:ring-primary focus:ring-offset-[#0B0D17] accent-primary cursor-pointer'
+                />
+                <span className='text-xs font-semibold hover:text-white transition-colors'>
+                  I confirm that I have read and agree to all terms, policies, and listing guidelines.
+                </span>
+              </label>
+            </div>
+          </div>
+        )}
 
         <div className='pt-10'>
             <button disabled={isLoading} className='w-full md:w-max px-12 py-6 bg-primary text-[#0a0a0a] rounded-2xl font-black uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(212,175,55,0.2)] hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:bg-primary-dull transition-all cursor-pointer flex items-center justify-center gap-4 text-sm disabled:opacity-50 disabled:cursor-not-allowed'>
