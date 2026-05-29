@@ -1,8 +1,10 @@
 import React from 'react'
 import { assets } from '../assets/assets'
 import { motion } from 'motion/react'
+import { useNavigate } from 'react-router-dom'
 
 const Banner = () => {
+  const navigate = useNavigate()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -31,6 +33,7 @@ const Banner = () => {
         </p>
 
         <motion.button
+          onClick={() => { navigate('/request-listing'); window.scrollTo(0,0); }}
           whileHover={{ scale: 1.05, boxShadow: "0 0 25px rgba(212,175,55,0.4)" }}
           whileTap={{ scale: 0.95 }}
           className='px-10 py-4 bg-primary text-[#0a0a0a] font-black tracking-widest uppercase text-xs rounded-2xl mt-10 transition-all cursor-pointer shadow-xl'
