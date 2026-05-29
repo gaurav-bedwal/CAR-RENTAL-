@@ -188,40 +188,91 @@ const Clients = () => {
 
                         {/* Modal Content */}
                         <div className='flex-1 overflow-y-auto p-8 scrollbar-hide'>
-                            {selectedClient.bookings && selectedClient.bookings.length > 0 ? (
-                                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                    {selectedClient.bookings.map((booking, idx) => (
-                                        <div key={idx} className='p-5 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all'>
-                                            <div className='flex justify-between items-start mb-4'>
-                                                <span className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-tighter ${
-                                                    booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 
-                                                    booking.status === 'pending' ? 'bg-orange-500/20 text-orange-400' : 'bg-red-500/20 text-red-400'
-                                                }`}>
-                                                    {booking.status}
-                                                </span>
-                                                <span className='text-xs font-black text-white'>{currency}{booking.price}</span>
+                            <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+                                
+                                {/* Left Column: Profile & Driving License */}
+                                <div className='lg:col-span-1 flex flex-col gap-6'>
+                                    <div className='p-6 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col gap-4'>
+                                        <h4 className='text-xs uppercase tracking-widest text-primary font-bold border-b border-white/5 pb-2'>Client Details</h4>
+                                        <div className='space-y-3'>
+                                            <div>
+                                                <span className='text-[9px] uppercase tracking-widest text-gray-500 block'>Email</span>
+                                                <span className='text-sm text-white font-medium break-all'>{selectedClient.email}</span>
                                             </div>
-                                            <h4 className='text-sm font-bold text-white mb-1'>{booking.car?.brand} {booking.car?.model}</h4>
-                                            <p className='text-[10px] text-gray-500 uppercase tracking-widest mb-3'>{booking.car?.category}</p>
-                                            
-                                            <div className='flex items-center justify-between pt-3 border-t border-white/5'>
-                                                <div className='text-[9px] uppercase tracking-tighter'>
-                                                    <span className='text-gray-600 block mb-1'>Pickup</span>
-                                                    <span className='text-gray-300 font-bold'>{new Date(booking.pickupDate).toLocaleDateString()}</span>
-                                                </div>
-                                                <div className='text-[9px] uppercase tracking-tighter text-right'>
-                                                    <span className='text-gray-600 block mb-1'>Return</span>
-                                                    <span className='text-gray-300 font-bold'>{new Date(booking.returnDate).toLocaleDateString()}</span>
-                                                </div>
+                                            <div>
+                                                <span className='text-[9px] uppercase tracking-widest text-gray-500 block'>Mobile</span>
+                                                <span className='text-sm text-white font-semibold'>{selectedClient.mobile || 'Not provided'}</span>
                                             </div>
                                         </div>
-                                    ))}
+                                    </div>
+
+                                    <div className='p-6 rounded-3xl bg-white/[0.02] border border-white/5 flex flex-col gap-4'>
+                                        <h4 className='text-xs uppercase tracking-widest text-primary font-bold border-b border-white/5 pb-2'>Verified Driving License</h4>
+                                        <div className='space-y-4'>
+                                            <div>
+                                                <span className='text-[9px] uppercase tracking-widest text-gray-500 block'>License Number</span>
+                                                <span className='text-sm text-white font-mono font-bold tracking-wider'>{selectedClient.drivingLicense || 'No license number'}</span>
+                                            </div>
+                                            <div>
+                                                <span className='text-[9px] uppercase tracking-widest text-gray-500 block mb-2'>License Image</span>
+                                                {selectedClient.licenseImage ? (
+                                                    <a href={selectedClient.licenseImage} target='_blank' rel='noreferrer' className='block group relative rounded-2xl overflow-hidden border border-white/10 hover:border-primary/50 transition-all bg-[#0a0a0a] cursor-zoom-in aspect-[1.58/1]'>
+                                                        <img src={selectedClient.licenseImage} alt="Driving License" className='w-full h-full object-cover group-hover:scale-105 transition-all' />
+                                                        <div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity'>
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-primary"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>
+                                                            <span className='text-[10px] uppercase font-bold tracking-widest text-white'>Zoom Image</span>
+                                                        </div>
+                                                    </a>
+                                                ) : (
+                                                    <div className='rounded-2xl border border-dashed border-white/10 py-8 text-center text-xs text-gray-500'>
+                                                        No license image uploaded
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            ) : (
-                                <div className='text-center py-20 opacity-30'>
-                                    <p className='text-sm font-bold uppercase tracking-[0.2em]'>No Bookings Found</p>
+
+                                {/* Right Column: Rental History */}
+                                <div className='lg:col-span-2 flex flex-col gap-4'>
+                                    <h4 className='text-xs uppercase tracking-widest text-primary font-bold border-b border-white/5 pb-2'>Rental Booking History</h4>
+                                    {selectedClient.bookings && selectedClient.bookings.length > 0 ? (
+                                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar'>
+                                            {selectedClient.bookings.map((booking, idx) => (
+                                                <div key={idx} className='p-5 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all'>
+                                                    <div className='flex justify-between items-start mb-4'>
+                                                        <span className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-tighter ${
+                                                            booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 
+                                                            booking.status === 'pending' ? 'bg-orange-500/20 text-orange-400' : 'bg-red-500/20 text-red-400'
+                                                        }`}>
+                                                            {booking.status}
+                                                        </span>
+                                                        <span className='text-xs font-black text-white'>{currency}{booking.price}</span>
+                                                    </div>
+                                                    <h4 className='text-sm font-bold text-white mb-1'>{booking.car?.brand} {booking.car?.model}</h4>
+                                                    <p className='text-[10px] text-gray-500 uppercase tracking-widest mb-3'>{booking.car?.category}</p>
+                                                    
+                                                    <div className='flex items-center justify-between pt-3 border-t border-white/5'>
+                                                        <div className='text-[9px] uppercase tracking-tighter'>
+                                                            <span className='text-gray-600 block mb-1'>Pickup</span>
+                                                            <span className='text-gray-300 font-bold'>{new Date(booking.pickupDate).toLocaleDateString()}</span>
+                                                        </div>
+                                                        <div className='text-[9px] uppercase tracking-tighter text-right'>
+                                                            <span className='text-gray-600 block mb-1'>Return</span>
+                                                            <span className='text-gray-300 font-bold'>{new Date(booking.returnDate).toLocaleDateString()}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className='text-center py-20 opacity-30'>
+                                            <p className='text-sm font-bold uppercase tracking-[0.2em]'>No Bookings Found</p>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+
+                            </div>
                         </div>
 
                         {/* Modal Footer */}
